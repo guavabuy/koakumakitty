@@ -1,142 +1,128 @@
-# 🐱 Kitty坏坏算命屋
+# 🐱 KOAKUMA KITTY / Kitty坏坏算命屋
 
-[![Live Demo](https://img.shields.io/badge/Live-guavaguy.xyz-ff69b4)](https://guavaguy.xyz)
+[![Live Demo](https://img.shields.io/badge/Live-kuakumakitty.com-ff69b4)](https://kuakumakitty.com)
 [![GitHub](https://img.shields.io/badge/GitHub-badkitty-blue)](https://github.com/guavabuy/badkitty)
 
 > ✨ 师承倪师，逢运帮助有缘喵~ ✨
 
-一个可爱又专业的中国传统命理算命网站，基于倪海厦大师的《天纪》《人间道》《地脉道》等著作开发。
+一个纯静态的中国传统命理/易占小站（Y2K 猫咪风），核心口径参考倪海厦《天纪》《人间道》《地脉道》等思路实现：八字排盘、流年/运势、择日、合婚、风水、面相与摇卦等。
 
-## 🌟 功能特色
+## 🌟 在线功能
 
-### 🌙 今日运势
-- 根据生日、时辰、性别计算每日运势
-- 综合运势、事业运、财运、感情运分析
-- 幸运颜色、数字、方位推荐
-- **Instagram 分享**：生成 1080x1080 精美图片，随机 Doja Cat 背景 + 酸贱猫言猫语
+- **🐴 2026 丙午年运势**：输入生日（可选时辰/性别/姓名），生成 2026 流年分析。
+- **🌙 今日运势**：按生日（可选时辰/性别/姓名）生成当日综合运势，并给出幸运提示。
+- **🔮 八字命盘**：四柱排盘（年/月/日/时）+ 结构化解读（十神/五行等）。
+- **💌 名字解密**：姓名笔画与结构化分析（偏传统“三才五格”等口径）。
+- **🎱 摇一摇占卜**：模拟摇卦并输出卦象解读。
+- **🏠 阳宅风水分析**：按出生信息与房屋坐向给出方位建议；支持可选上传户型图做更细的布局提示。
+- **💑 姻缘配对**：双方姓名 + 出生信息的匹配分析与评分。
+- **👀 面相分析**：支持拍照/上传，基于 `face-api.js` 做人脸检测并输出面相向的解读提示。
+- **📅 良辰吉日**：给定事项（表白/结婚/搬家/打麻将等）与计划日期，输出择日报告。
 
-### 🔮 八字命盘
-- 完整八字排盘（年柱、月柱、日柱、时柱）
-- 十神关系解读
-- 五行分析与补救建议
-- 事业财运、健康建议
-
-### 💌 名字解密
-- 姓名笔画分析
-- 三才五格计算
-- 姓名五行配置评估
-
-### 🎱 摇一摇占卜
-- 易经六十四卦摇卦
-- 模拟古法铜钱占卜
-- 卦象详细解读与建议
-
-### 🏠 风水分析
-- 基于《地脉道》理论
-- 根据出生年份计算命宫
-- 房屋坐向吉凶分析
-- 支持上传户型图获取更详细分析
-
-### 💑 姻缘配对
-- 双方八字+姓名深度匹配
-- 五行相生相克分析
-- 整体缘分评分
-
-### 👀 面相分析
-- 基于《人间道》理论
-- 支持拍照或上传照片
-- AI 面部特征识别
-
-### 📅 良辰吉日
-- 基于《天纪》择日理论
-- 多种事项择日：表白、结婚、搬家、打麻将等
-- 推荐最佳日期
+> 说明：所有计算均在浏览器端完成；项目本身不需要后端即可运行。
 
 ## 🛠️ 技术栈
 
-- **前端**: 纯 HTML5 + CSS3 + JavaScript (无框架)
-- **风格**: Y2K 复古可爱风格
-- **响应式**: 完美适配移动端和桌面端
-- **分享功能**: Canvas API + QRCode.js + html2canvas
-- **面部识别**: face-api.js
-- **分析追踪**: Google Analytics 4
+- **前端**：HTML5 + CSS3 + JavaScript（无框架）
+- **模块化**：ES Modules（部分脚本使用 `type="module"`）
+- **历法/节气核心**：`js/core/`（口径文档见 `docs/calendar_spec.md`）
+- **分享能力**：Canvas + `html2canvas` + `qrcodejs`
+- **面部识别**：`face-api.js`（CDN）
+- **数据分析**：Google Analytics 4（如不需要可移除相关脚本）
 
-## 📁 项目结构（以仓库根目录为准）
-
-> 说明：`legacy/fortune-telling-app/` 为历史副本（已不作为主线入口），当前主线口径以根目录 `js/core/` 为准。历法/节气口径详见 `docs/calendar_spec.md`。
+## 📁 项目结构
 
 ```
 .
-├── index.html              # 主页面（静态站点入口）
-├── css/                    # 样式
-├── js/                     # 前端逻辑
-├── images/                 # 前端图片资源（运行必需）
-├── docs/                   # 文档（设计/架构等）
-├── backend/                # 预留：后台/服务端（已清空，准备重新搭建）
-└── resources/              # 资料/素材库（PDF/JPG/GIF，非运行必需）
+├── index.html                  # 静态站点入口
+├── css/
+│   └── styles.css              # 全站样式（Y2K 猫咪风）
+├── js/
+│   ├── main.js                 # 页面交互与模块初始化（tab 切换/表单提交等）
+│   ├── daily.js                # 今日运势
+│   ├── yearly2026.js           # 2026 丙午年运势
+│   ├── bazi.js                 # 八字命盘
+│   ├── name.js                 # 名字解密
+│   ├── yijing.js               # 摇一摇占卜
+│   ├── fengshui.js             # 阳宅风水
+│   ├── marriage.js             # 姻缘配对
+│   ├── facereading.js          # 面相分析（调用 face-api）
+│   ├── auspicious.js           # 良辰吉日（择日）
+│   ├── share.js                # 分享图生成（Canvas/html2canvas/QR）
+│   ├── tracker.js              # 埋点/使用统计（GA 事件封装）
+│   ├── datepicker.js           # 日期选择辅助
+│   ├── verify_dayun.js         # 口径验证/对照脚本（开发用）
+│   ├── verify_rules.js         # 口径验证/对照脚本（开发用）
+│   └── core/                   # 历法与规则核心
+│       ├── calendar.js
+│       ├── solar_terms.js
+│       ├── dayun.js
+│       ├── liunian.js
+│       ├── nishi_rules.js
+│       └── calendar_test.js
+├── images/                     # 前端图片资源（运行必需）
+│   ├── favicon.png
+│   ├── kitty-icon.jpg
+│   ├── kitty-logo.png
+│   ├── background.jpg
+│   └── doja/                   # 分享背景素材
+├── docs/                       # 设计/架构/口径文档
+│   ├── calendar_spec.md
+│   ├── nishi_rules_spec.md
+│   ├── architecture_diagram.md
+│   └── y2k_cat_design_system.md
+├── robots.txt
+└── sitemap.xml
 ```
 
 ## 🚀 快速开始
 
-### 本地运行
+### 本地运行（推荐）
+
+> 由于使用了 ES Module（`type="module"`），请用本地 HTTP 服务打开，不要直接双击 `index.html`（`file://` 下会被浏览器拦截导入）。
 
 ```bash
-# 克隆仓库
-git clone https://github.com/guavabuy/badkitty.git
-
 # 进入项目目录
-cd badkitty
+cd KuokamaKitty
 
-# 启动本地服务器
+# Python（推荐）
 python3 -m http.server 8080
 
-# 或使用 Node.js
-npx serve .
+# 或 Node（无交互）
+npx --yes serve .
 ```
 
-访问 http://localhost:8080 即可查看
+打开 `http://localhost:8080`。
 
 ### 部署
 
-项目为纯静态网站，可部署到任何静态托管服务：
+本项目为纯静态站点，可部署到任意静态托管：
+
 - GitHub Pages
-- Vercel
-- Netlify
-- Digital Ocean App Platform
+- Vercel / Netlify
+- Cloudflare Pages
 
-## 📱 分享功能
+## 📚 文档索引
 
-每日运势模块支持生成 Instagram 风格的分享图片：
+- `docs/calendar_spec.md`：历法/节气/四柱口径（立春换年、节气定月、时区策略等）
+- `docs/nishi_rules_spec.md`：规则口径说明（开发用）
+- `docs/architecture_diagram.md`：整体结构与模块关系
+- `docs/y2k_cat_design_system.md`：视觉与组件风格规范
 
-- **尺寸**: 1080x1080 正方形
-- **背景**: 随机 Doja Cat 表情图（根据运势好坏选择不同图片）
-- **内容**: 运势星星 + 幸运信息 + 酸贱猫言猫语
-- **二维码**: 右下角 guavaguy.xyz 二维码
+## 🐾 关于倪师（致敬）
 
-## 🐾 关于倪师
-
-倪海厦（1953-2012），台湾著名中医师、命理学家，著有：
-- 《天纪》- 命理学
-- 《人间道》- 面相学
-- 《地脉道》- 风水学
-- 以及中医经方系列著作
-
-本项目算法灵感来源于倪师的著作和讲座。
+倪海厦（1953-2012），台湾著名中医师、命理学家。本站为学习/致敬向作品，部分理论与表达参考其讲解与著作思路整理实现。
 
 ## 📄 免责声明
 
-✧ 本站内容仅供娱乐参考，不作为婚姻、投资、求职等重大人生决策的依据 ✧
-
-本应用基于中国传统命理学（八字、易经、风水等）理论开发，所有分析结果均为算法计算生成，不代表任何专业建议。命运掌握在你自己手里，你的选择和努力才是决定人生的关键因素。
-
-如需做出重大人生决策，请咨询专业人士或自行审慎评估。
+✧ 本站内容仅供娱乐与学习参考，不作为婚姻、投资、求职等重大人生决策依据 ✧  
+所有分析结果均为算法推演与文本模板生成，不构成任何专业建议。重要决策请自行审慎评估或咨询专业人士。
 
 ## 💖 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提 Issue / PR。建议在提交前先说明：你想优化的是**哪一个模块**（如 `daily` / `bazi` / `js/core` 口径等），以及期望的输入输出示例，方便快速对齐。
 
 ---
 
-Made with 💕 by [Guava Guy](https://guavaguy.xyz)
-
+Made with 💕 by [Guava Guy](https://guavaguy.xyz)  
 🐱 豆荚猫也是猫，喵 🐱
