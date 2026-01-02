@@ -1,0 +1,252 @@
+/**
+ * 姓名分析模块 - 五格剖象法
+ */
+
+
+import { NiShiRules } from './core/nishi_rules.js';
+
+const NameAnalysis = {
+
+    // 常用汉字笔画
+    strokeData: {
+        '王': 4, '李': 7, '张': 11, '刘': 15, '陈': 16, '杨': 13, '赵': 14, '黄': 12,
+        '周': 8, '吴': 7, '徐': 10, '孙': 10, '马': 10, '朱': 6, '胡': 11, '郭': 15,
+        '林': 8, '何': 7, '高': 10, '梁': 11, '郑': 19, '罗': 20, '宋': 7, '谢': 17,
+        '唐': 10, '韩': 17, '冯': 12, '于': 3, '董': 15, '萧': 18, '程': 12, '曹': 11,
+        '明': 8, '伟': 11, '芳': 10, '娜': 10, '秀': 7, '英': 11, '敏': 11, '静': 16,
+        '丽': 19, '强': 12, '磊': 15, '军': 9, '洋': 10, '勇': 9, '艳': 24, '杰': 12,
+        '华': 14, '飞': 9, '玲': 10, '平': 5, '斌': 12, '萍': 14, '鑫': 24, '鹏': 19,
+        '辉': 15, '浩': 11, '梅': 11, '刚': 10, '建': 9, '国': 11, '云': 12, '洁': 16,
+        '红': 9, '波': 9, '俊': 9, '海': 11, '琴': 13, '婷': 12, '燕': 16, '霞': 17,
+        '玉': 5, '春': 9, '雪': 11, '晓': 16, '雷': 13, '峰': 10, '宏': 7, '志': 7,
+        '新': 13, '良': 7, '亮': 9, '东': 8, '光': 6, '成': 7, '中': 4, '正': 5,
+        '安': 6, '德': 15, '文': 4, '武': 8, '天': 4, '心': 4, '思': 9, '美': 9,
+        '子': 3, '轩': 10, '涵': 12, '航': 10, '晨': 11, '铭': 14, '皓': 12, '嘉': 14,
+        '一': 1, '二': 2, '三': 3, '四': 5, '五': 4, '六': 4, '七': 2, '八': 2, '九': 2
+    },
+
+    // 数理吉凶（1-81）
+    numberLuck: {
+        1: { luck: 'good', meaning: '太极之数，万物开泰，利禄亨通' },
+        3: { luck: 'good', meaning: '三才之数，天地人和，繁荣昌隆' },
+        5: { luck: 'good', meaning: '五行俱权，循环相生，圆通畅达' },
+        6: { luck: 'good', meaning: '六爻之数，天赋美德，吉祥安泰' },
+        7: { luck: 'good', meaning: '七政之数，吉星照耀，天赋之力' },
+        8: { luck: 'good', meaning: '八卦之数，坚毅刚勇，功成名就' },
+        11: { luck: 'good', meaning: '旱苗逢雨，繁荣昌盛，挽回家运' },
+        13: { luck: 'good', meaning: '春日牡丹，才艺多能，智谋奇略' },
+        15: { luck: 'good', meaning: '福寿圆满，兴家聚财，温和雅量' },
+        16: { luck: 'good', meaning: '厚重载德，安富尊荣，财官双美' },
+        21: { luck: 'good', meaning: '明月中天，独立权威，繁荣富贵' },
+        23: { luck: 'good', meaning: '旭日东升，权威旺盛，壮丽壮观' },
+        24: { luck: 'good', meaning: '掘藏得金，金钱丰盈，白手成家' },
+        31: { luck: 'good', meaning: '春日花开，博得名利，统领众人' },
+        32: { luck: 'good', meaning: '侥幸多望，贵人得助，财帛如意' },
+        33: { luck: 'good', meaning: '旭日升天，家门隆昌，功名显达' },
+        35: { luck: 'good', meaning: '高楼望月，智达通畅，文昌技艺' },
+        37: { luck: 'good', meaning: '权威显达，独立活动，天赋幸福' },
+        41: { luck: 'good', meaning: '纯阳独秀，德高望重，名利双收' },
+        45: { luck: 'good', meaning: '顺风显达，大展鸿图，新生泰和' },
+        47: { luck: 'good', meaning: '点石成金，万事如意，祯祥吉庆' },
+        48: { luck: 'good', meaning: '智谋兼备，德量荣达，威望成师' },
+        52: { luck: 'good', meaning: '卓识达眼，先见之明，成功必至' },
+        2: { luck: 'bad', meaning: '两仪之数，进退保守，志望难达' },
+        4: { luck: 'bad', meaning: '四象之数，万事慎重，不具营谋' },
+        9: { luck: 'bad', meaning: '大成之数，或成或败，难以把握' },
+        10: { luck: 'bad', meaning: '终结之数，万事终局，不可上进' },
+        12: { luck: 'bad', meaning: '掘井无泉，意志薄弱，企图不力' },
+        14: { luck: 'bad', meaning: '破兆之数，孤独遭难，谋事不达' },
+        19: { luck: 'bad', meaning: '多难之数，常陷逆境，辛苦重来' },
+        20: { luck: 'bad', meaning: '屋下藏金，灾难重重，进退维谷' },
+        22: { luck: 'bad', meaning: '秋草逢霜，孤独凋零，百事不如意' },
+        34: { luck: 'bad', meaning: '破家之数，灾祸至极，见识不详' },
+        36: { luck: 'bad', meaning: '波澜之数，一身孤苦，风浪不息' }
+    },
+
+    getStrokeCount(char) {
+        return this.strokeData[char] || 10;
+    },
+
+    calculateWuge(name) {
+        const chars = name.split('');
+        const strokes = chars.map(c => this.getStrokeCount(c));
+        let tianGe, renGe, diGe, waiGe, zongGe;
+
+        if (chars.length === 2) {
+            tianGe = strokes[0] + 1;
+            renGe = strokes[0] + strokes[1];
+            diGe = strokes[1] + 1;
+            waiGe = 2;
+            zongGe = strokes[0] + strokes[1];
+        } else if (chars.length >= 3) {
+            tianGe = strokes[0] + 1;
+            renGe = strokes[0] + strokes[1];
+            diGe = strokes[1] + strokes[2];
+            waiGe = strokes[0] + strokes[2] + 1;
+            zongGe = strokes.reduce((a, b) => a + b, 0);
+        }
+
+        const normalize = n => n > 81 ? ((n - 1) % 80) + 1 : n;
+        return {
+            chars, strokes, tianGe: normalize(tianGe), renGe: normalize(renGe),
+            diGe: normalize(diGe), waiGe: normalize(waiGe), zongGe: normalize(zongGe)
+        };
+    },
+
+    getLuck(number) {
+        return this.numberLuck[number] || { luck: 'neutral', meaning: '数理平常，中庸之道' };
+    },
+
+    analyze(name) {
+        if (!name || name.length < 2) return { error: '请输入有效的中文姓名' };
+        const wuge = this.calculateWuge(name);
+        return {
+            name, wuge,
+            luck: {
+                tian: this.getLuck(wuge.tianGe),
+                ren: this.getLuck(wuge.renGe),
+                di: this.getLuck(wuge.diGe),
+                wai: this.getLuck(wuge.waiGe),
+                zong: this.getLuck(wuge.zongGe)
+            }
+        };
+    },
+
+    /**
+     * [NiShi Standard] 标准化姓名分析接口
+     */
+    analyzeStandard(name) {
+        // 1. 获取基础计算结果
+        const result = this.analyze(name);
+        if (result.error) return null;
+
+        // 2. 映射到标准结论
+        const { wuge, luck } = result;
+        const goodCount = [luck.tian, luck.ren, luck.di, luck.wai, luck.zong].filter(l => l.luck === 'good').length;
+
+        let level = '平';
+        let stars = 3;
+        if (goodCount >= 4) { level = '大吉'; stars = 5; }
+        else if (goodCount >= 2) { level = '吉'; stars = 4; }
+        else if (goodCount === 0) { level = '凶'; stars = 2; }
+
+        return NiShiRules.createResult({
+            source: 'RenJian', // 姓名属于人间道（决策/辅助）
+            pattern: {
+                name: `${name} (${wuge.zongGe}画)`,
+                symbol: '📝',
+                attributes: wuge
+            },
+            calculation: {
+                score: 60 + (goodCount * 8),
+                balance: '无', // 姓名学暂不强调平衡，重数理吉凶
+                energy: { '吉格': goodCount, '凶格': 5 - goodCount }
+            },
+            verdict: {
+                level: level,
+                stars: stars,
+                summary: `总格${wuge.zongGe}，${luck.zong.meaning}。`
+            },
+            guidance: {
+                // 人间道：
+                action: `人格${wuge.renGe}：${luck.ren.meaning}，宜发挥优势，修身养性。`,
+                // 天机道：
+                timing: '姓名伴随一生，改名或许能改运，但心态更重要。',
+                // 地脉道：
+                adjustment: '书写名字时，笔画宜清晰饱满，象征运势通达。'
+            }
+        });
+    },
+
+    renderResult(result) {
+        if (result.error) return `<div class="analysis-card"><p>${result.error}</p></div>`;
+        const { wuge, luck } = result;
+        const getLuckClass = l => l.luck === 'good' ? 'good' : l.luck === 'bad' ? 'bad' : 'neutral';
+        const getLuckText = l => l.luck === 'good' ? '吉' : l.luck === 'bad' ? '凶' : '平';
+
+        let html = '<div class="name-display"><div class="name-chars">';
+        wuge.chars.forEach((c, i) => {
+            html += `<div class="name-char">${c}<span class="stroke-count">${wuge.strokes[i]}画</span></div>`;
+        });
+        html += '</div></div>';
+
+        // 五格说明
+        html += `<div class="analysis-card">
+            <h4>📚 什么是五格剖象法？</h4>
+            <p>五格剖象法是根据汉字笔画数来分析姓名吉凶的方法。通过"天格、人格、地格、外格、总格"五个维度来解读姓名的能量。</p>
+        </div>`;
+
+        html += `<div class="wuge-grid">
+            <div class="wuge-item"><div class="wuge-name">天格</div><div class="wuge-number">${wuge.tianGe}</div><span class="wuge-luck ${getLuckClass(luck.tian)}">${getLuckText(luck.tian)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">人格</div><div class="wuge-number">${wuge.renGe}</div><span class="wuge-luck ${getLuckClass(luck.ren)}">${getLuckText(luck.ren)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">地格</div><div class="wuge-number">${wuge.diGe}</div><span class="wuge-luck ${getLuckClass(luck.di)}">${getLuckText(luck.di)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">外格</div><div class="wuge-number">${wuge.waiGe}</div><span class="wuge-luck ${getLuckClass(luck.wai)}">${getLuckText(luck.wai)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">总格</div><div class="wuge-number">${wuge.zongGe}</div><span class="wuge-luck ${getLuckClass(luck.zong)}">${getLuckText(luck.zong)}</span></div>
+        </div>`;
+
+        // 详细的五格解释
+        html += `<div class="analysis-card">
+            <h4>👤 人格分析（主运）- 数理${wuge.renGe}</h4>
+            <p><strong>什么是人格？</strong> 人格是姓名中最重要的格数，代表你的主要性格和一生的运势走向，就像你的"人生主旋律"。</p>
+            <p><strong>你的人格：</strong> ${luck.ren.meaning}</p>
+            <p>💡 ${luck.ren.luck === 'good' ? '这是一个很好的人格数理，有利于事业发展和人际关系！' : luck.ren.luck === 'bad' ? '这个人格数理可能会带来一些挑战，但通过努力可以克服。记住，命运掌握在自己手中！' : '这是一个中性的人格数理，平稳发展，关键看个人努力。'}</p>
+        </div>`;
+
+        html += `<div class="analysis-card">
+            <h4>🎯 总格分析（后运）- 数理${wuge.zongGe}</h4>
+            <p><strong>什么是总格？</strong> 总格代表你的后半生运势，尤其是48岁以后的人生走向，也象征你一生的总体成就。</p>
+            <p><strong>你的总格：</strong> ${luck.zong.meaning}</p>
+            <p>💡 ${luck.zong.luck === 'good' ? '后运吉祥，晚年会比较顺遂，年轻时的努力会在后期得到回报！' : luck.zong.luck === 'bad' ? '后运可能有些起伏，建议提早规划，为晚年做好准备。' : '后运平稳，顺其自然发展即可。'}</p>
+        </div>`;
+
+        html += `<div class="analysis-card">
+            <h4>🌱 地格分析（前运）- 数理${wuge.diGe}</h4>
+            <p><strong>什么是地格？</strong> 地格代表你的前半生运势（36岁前），包括学业、早期事业和感情基础。</p>
+            <p><strong>你的地格：</strong> ${luck.di.meaning}</p>
+        </div>`;
+
+        html += `<div class="analysis-card">
+            <h4>🤝 外格分析（副运）- 数理${wuge.waiGe}</h4>
+            <p><strong>什么是外格？</strong> 外格代表你的人际关系和社会环境，反映别人眼中的你以及你的社交运势。</p>
+            <p><strong>你的外格：</strong> ${luck.wai.meaning}</p>
+        </div>`;
+
+        html += `<div class="analysis-card">
+            <h4>🏠 天格分析（祖运）- 数理${wuge.tianGe}</h4>
+            <p><strong>什么是天格？</strong> 天格代表祖先留给你的运势，与你的家族背景和先天条件有关。通常不直接影响命运，但会间接影响你的起点。</p>
+            <p><strong>你的天格：</strong> ${luck.tian.meaning}</p>
+            <p>💡 天格是由姓氏决定的，无法改变，因此不必过于在意。</p>
+        </div>`;
+
+        // 综合建议
+        const goodCount = [luck.tian, luck.ren, luck.di, luck.wai, luck.zong].filter(l => l.luck === 'good').length;
+        const badCount = [luck.tian, luck.ren, luck.di, luck.wai, luck.zong].filter(l => l.luck === 'bad').length;
+
+        let overallAdvice = '';
+        if (goodCount >= 4) {
+            overallAdvice = `🎉 恭喜！您的姓名五格整体非常吉利（${goodCount}个吉格），是一个很好的名字！这个名字能为您带来顺遂的运势，助力人生发展。`;
+        } else if (goodCount >= 2) {
+            overallAdvice = `✨ 您的姓名五格中有${goodCount}个吉格，整体还不错。有些方面需要自己多加努力，但总体运势是正向的。`;
+        } else if (badCount >= 3) {
+            overallAdvice = `💪 您的姓名五格中有${badCount}个需要注意的格数。不过请记住，姓名只是参考，真正决定命运的是你的选择和努力。保持积极心态，一切皆有可能！`;
+        } else {
+            overallAdvice = `☯️ 您的姓名五格比较中性，没有特别突出的吉凶。这意味着你的人生掌握在自己手中，努力和选择会决定你的未来走向。`;
+        }
+
+        html += `<div class="analysis-card">
+            <h4>📋 综合评价</h4>
+            <p>${overallAdvice}</p>
+            <p>⚠️ 温馨提示：姓名学只是人生的一个参考维度，不能完全决定命运。心态、努力、选择才是人生的关键！</p>
+        </div>`;
+
+        // 添加点赞分享按钮
+        if (typeof ShareUtils !== 'undefined') {
+            html += ShareUtils.createActionButtons('name');
+        }
+
+        return html;
+    }
+};
+
+window.NameAnalysis = NameAnalysis;
+

@@ -1,0 +1,18 @@
+### OS / Editor
+.DS_Store
+
+### Dependencies
+node_modules/
+
+### Secrets / env
+.env
+*client_secret*.json
+
+### Runtime data (sqlite)
+backend/data/*.db
+backend/data/*.db-*
+legacy/fortune-telling-app/backend/data/*.db
+legacy/fortune-telling-app/backend/data/*.db-*
+
+### Large assets (optional)
+*.pdf
