@@ -3,8 +3,24 @@
  * 处理页面交互和模块调用
  */
 
+// ============ Hash 路由配置 ============
+const TAB_CONFIG = {
+    defaultTab: 'yearly2026',
+    titles: {
+        'yearly2026': '🐴 2026流年运势 - KOAKUMA KITTY',
+        'daily': '🌙 今日运势播报 - KOAKUMA KITTY',
+        'bazi': '🔮 八字命盘详解 - KOAKUMA KITTY',
+        'name': '💌 姓名解密 - KOAKUMA KITTY',
+        'yijing': '🎱 易经摇一摇 - KOAKUMA KITTY',
+        'fengshui': '🏠 阳宅风水布局 (天纪版) - KOAKUMA KITTY',
+        'marriage': '💑 姓名八字合婚 - KOAKUMA KITTY',
+        'facereading': '👀 AI面相分析 - KOAKUMA KITTY',
+        'auspicious': '📅 良辰吉日择选 - KOAKUMA KITTY'
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function () {
-    // 初始化
+    // 初始化路由和模块
     initTabs();
     initBaZi();
     initName();
@@ -18,41 +34,101 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * 标签页切换
+ * 从 URL hash 中解析 tabKey
+ * @returns {string|null} 有效的 tabKey 或 null
+ */
+function getTabKeyFromHash() {
+    const hash = window.location.hash;
+    if (!hash || hash === '#') {
+        return null;
+    }
+    // 去掉 # 号
+    const tabKey = hash.substring(1);
+    // 验证是否为有效的 tab
+    if (TAB_CONFIG.titles[tabKey]) {
+        return tabKey;
+    }
+    return null;
+}
+
+/**
+ * 激活指定的 Tab
+ * 统一处理 UI 切换 + title 更新 + 滚动控制
+ * @param {string} tabKey - 要激活的 tab key
+ */
+function activateTab(tabKey) {
+    const tabs = document.querySelectorAll('.nav-tab');
+    const contents = document.querySelectorAll('.tab-content');
+    
+    // 验证 tabKey 有效性
+    const targetContent = document.getElementById(tabKey);
+    const targetTab = document.querySelector(`.nav-tab[data-tab="${tabKey}"]`);
+    
+    if (!targetContent || !targetTab) {
+        // 无效的 tabKey，回退到默认
+        tabKey = TAB_CONFIG.defaultTab;
+        // 修正 URL（静默替换，不触发 hashchange）
+        history.replaceState(null, '', window.location.pathname);
+    }
+    
+    // 移除所有活动状态
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+    
+    // 添加当前活动状态
+    const activeTab = document.querySelector(`.nav-tab[data-tab="${tabKey}"]`);
+    const activeContent = document.getElementById(tabKey);
+    
+    if (activeTab) activeTab.classList.add('active');
+    if (activeContent) activeContent.classList.add('active');
+    
+    // 更新 document.title
+    if (TAB_CONFIG.titles[tabKey]) {
+        document.title = TAB_CONFIG.titles[tabKey];
+    }
+    
+    // 控制滚动，防止 hash 导致的页面跳动
+    window.scrollTo(0, 0);
+}
+
+/**
+ * 标签页切换（Hash 路由版本）
+ * 点击 Tab 时只更新 hash，由 hashchange 统一触发 UI 更新
  */
 function initTabs() {
     const tabs = document.querySelectorAll('.nav-tab');
-    const contents = document.querySelectorAll('.tab-content');
-
-    const titles = {
-        'yearly2026': '🐴 2026流年运势 - KOAKUMA KITTY',
-        'daily': '🌙 今日运势播报 - KOAKUMA KITTY',
-        'bazi': '🔮 八字命盘详解 - KOAKUMA KITTY',
-        'name': '💌 姓名解密 - KOAKUMA KITTY',
-        'yijing': '🎱 易经摇一摇 - KOAKUMA KITTY',
-        'fengshui': '🏠 阳宅风水布局 (天纪版) - KOAKUMA KITTY',
-        'marriage': '💑 姓名八字合婚 - KOAKUMA KITTY',
-        'facereading': '👀 AI面相分析 - KOAKUMA KITTY',
-        'auspicious': '📅 良辰吉日择选 - KOAKUMA KITTY'
-    };
-
+    
+    // 绑定点击事件：只更新 hash，不直接切换 UI
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            // 移除所有活动状态
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.classList.remove('active'));
-
-            // 添加当前活动状态
-            tab.classList.add('active');
-            const targetId = tab.getAttribute('data-tab');
-            document.getElementById(targetId).classList.add('active');
-
-            // 动态修改标题
-            if (titles[targetId]) {
-                document.title = titles[targetId];
-            }
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetTab = tab.getAttribute('data-tab');
+            
+            // 更新 URL hash（会触发 hashchange 事件）
+            // 使用 pushState 而不是直接设置 hash，以便更好地控制历史记录
+            const newUrl = `${window.location.pathname}#${targetTab}`;
+            history.pushState(null, '', newUrl);
+            
+            // 手动触发 UI 更新（pushState 不会自动触发 hashchange）
+            activateTab(targetTab);
         });
     });
+    
+    // 监听 popstate 事件（浏览器后退/前进按钮）
+    window.addEventListener('popstate', () => {
+        const tabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
+        activateTab(tabKey);
+    });
+    
+    // 监听 hashchange 事件（直接修改 hash 或点击带 # 的链接）
+    window.addEventListener('hashchange', () => {
+        const tabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
+        activateTab(tabKey);
+    });
+    
+    // 页面初始化：读取当前 hash 并激活对应 Tab
+    const initialTabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
+    activateTab(initialTabKey);
 }
 
 /**
@@ -251,13 +327,8 @@ function initDaily() {
                 const hideAndSeekBtn = document.getElementById('daily-hide-seek-btn');
                 if (hideAndSeekBtn) {
                     hideAndSeekBtn.addEventListener('click', () => {
-                        // 切换到良辰吉日tab
-                        const auspiciousTab = document.querySelector('.nav-tab[data-tab="auspicious"]');
-                        if (auspiciousTab) {
-                            auspiciousTab.click();
-                            // 滚动到顶部
-                            document.getElementById('auspicious').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
+                        // 切换到良辰吉日tab（通过 hash 路由）
+                        window.location.hash = 'auspicious';
                     });
                 }
             } catch (error) {
