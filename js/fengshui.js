@@ -677,22 +677,24 @@ const FengShui = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
         
         // 命系翻译
         const lifeTypeEn = mingGua.lifeType === '东四命' ? 'East Group' : 'West Group';
+        const lifeTypeJa = mingGua.lifeType === '东四命' ? '東四命' : '西四命';
 
         let html = '';
 
         // 命卦信息
         html += `
             <div class="analysis-card fengshui-card">
-                <h4>🔮 ${isEn ? `Your Ming Gua: ${mingGua.name} Gua (${lifeTypeEn})` : `你的命卦：${mingGua.name}卦（${mingGua.lifeType}）`}</h4>
+                <h4>🔮 ${isJa ? `あなたの命卦：${mingGua.name}卦（${lifeTypeJa}）` : isEn ? `Your Ming Gua: ${mingGua.name} Gua (${lifeTypeEn})` : `你的命卦：${mingGua.name}卦（${mingGua.lifeType}）`}</h4>
                 <div class="mingua-info">
                     <div class="mingua-symbol">${this.getGuaSymbol(mingGua.name)}</div>
                     <div class="mingua-details">
-                        <p><strong>${isEn ? 'Element:' : '五行属性：'}</strong>${mingGua.element}</p>
-                        <p><strong>${isEn ? 'Direction:' : '本命方位：'}</strong>${mingGua.direction}</p>
-                        <p><strong>${isEn ? 'Group:' : '命系分类：'}</strong>${isEn ? lifeTypeEn : mingGua.lifeType}</p>
+                        <p><strong>${isJa ? '五行属性：' : isEn ? 'Element:' : '五行属性：'}</strong>${mingGua.element}</p>
+                        <p><strong>${isJa ? '本命方位：' : isEn ? 'Direction:' : '本命方位：'}</strong>${mingGua.direction}</p>
+                        <p><strong>${isJa ? '命系分類：' : isEn ? 'Group:' : '命系分类：'}</strong>${isJa ? lifeTypeJa : isEn ? lifeTypeEn : mingGua.lifeType}</p>
                     </div>
                 </div>
             </div>
@@ -701,12 +703,12 @@ const FengShui = {
         // 命卦性格详解
         html += `
             <div class="analysis-card">
-                <h4>📖 ${isEn ? `${mingGua.name} Gua Personality` : `${mingGua.name}卦性格详解`}</h4>
+                <h4>📖 ${isJa ? `${mingGua.name}卦の性格詳解` : isEn ? `${mingGua.name} Gua Personality` : `${mingGua.name}卦性格详解`}</h4>
                 <p>${mingGua.personality.personality}</p>
-                <p><strong>💼 ${isEn ? 'Career:' : '事业建议：'}</strong>${mingGua.personality.career}</p>
-                <p><strong>💰 ${isEn ? 'Wealth:' : '财运提示：'}</strong>${mingGua.personality.wealth}</p>
-                <p><strong>❤️ ${isEn ? 'Love:' : '感情建议：'}</strong>${mingGua.personality.relationship}</p>
-                <p><strong>🏥 ${isEn ? 'Health:' : '健康注意：'}</strong>${mingGua.personality.health}</p>
+                <p><strong>💼 ${isJa ? '仕事アドバイス：' : isEn ? 'Career:' : '事业建议：'}</strong>${mingGua.personality.career}</p>
+                <p><strong>💰 ${isJa ? '金運ヒント：' : isEn ? 'Wealth:' : '财运提示：'}</strong>${mingGua.personality.wealth}</p>
+                <p><strong>❤️ ${isJa ? '恋愛アドバイス：' : isEn ? 'Love:' : '感情建议：'}</strong>${mingGua.personality.relationship}</p>
+                <p><strong>🏥 ${isJa ? '健康注意：' : isEn ? 'Health:' : '健康注意：'}</strong>${mingGua.personality.health}</p>
             </div>
         `;
 
@@ -843,14 +845,14 @@ const FengShui = {
         // 温馨提示
         html += `
             <div class="analysis-card">
-                <h4>📝 ${isEn ? 'Tips' : '温馨提示'}</h4>
-                <p>${isEn ? 'Feng Shui is a supplementary study aimed at creating harmonious living environments. Good Feng Shui enhances fortune, but personal effort and positive attitude matter most!' : '风水是一门辅助性的学问，旨在让居住环境更加和谐舒适。好风水可以锦上添花，但最重要的还是个人的努力和积极的心态！'}</p>
-                <p>${isEn ? 'If you cannot fully adjust your current layout, try these improvements:' : '如果现有房屋布局无法完全按照建议调整，可以通过以下方式改善：'}</p>
+                <h4>📝 ${isJa ? 'ワンポイントアドバイス' : isEn ? 'Tips' : '温馨提示'}</h4>
+                <p>${isJa ? '風水は補助的な学問で、住環境を調和させることが目的よ。いい風水は運を後押しするけど、一番大事なのは自分の努力とポジティブな姿勢よ！' : isEn ? 'Feng Shui is a supplementary study aimed at creating harmonious living environments. Good Feng Shui enhances fortune, but personal effort and positive attitude matter most!' : '风水是一门辅助性的学问，旨在让居住环境更加和谐舒适。好风水可以锦上添花，但最重要的还是个人的努力和积极的心态！'}</p>
+                <p>${isJa ? '今の間取りを完全に変えられなくても、こんな方法で改善できるわよ：' : isEn ? 'If you cannot fully adjust your current layout, try these improvements:' : '如果现有房屋布局无法完全按照建议调整，可以通过以下方式改善：'}</p>
                 <ul>
-                    <li>${isEn ? 'Place important furniture (bed, desk, sofa) in auspicious positions' : '在吉位摆放重要家具（床、书桌、沙发等）'}</li>
-                    <li>${isEn ? 'Use remedy items in unfavorable areas or reduce time spent there' : '在凶位使用化解物品或减少停留时间'}</li>
-                    <li>${isEn ? 'Keep your home clean and bright for smooth energy flow' : '保持房屋整洁明亮，气场自然顺畅'}</li>
-                    <li>${isEn ? 'Spend more time in auspicious directions to absorb positive energy' : '多在吉方位活动，接收正能量'}</li>
+                    <li>${isJa ? '吉方位に重要な家具（ベッド、デスク、ソファなど）を置く' : isEn ? 'Place important furniture (bed, desk, sofa) in auspicious positions' : '在吉位摆放重要家具（床、书桌、沙发等）'}</li>
+                    <li>${isJa ? '凶方位には化解アイテムを置くか、滞在時間を減らす' : isEn ? 'Use remedy items in unfavorable areas or reduce time spent there' : '在凶位使用化解物品或减少停留时间'}</li>
+                    <li>${isJa ? '家を清潔で明るく保てば、気の流れもスムーズになるわ' : isEn ? 'Keep your home clean and bright for smooth energy flow' : '保持房屋整洁明亮，气场自然顺畅'}</li>
+                    <li>${isJa ? '吉方位で過ごす時間を増やして、ポジティブなエネルギーを受け取って' : isEn ? 'Spend more time in auspicious directions to absorb positive energy' : '多在吉方位活动，接收正能量'}</li>
                 </ul>
             </div>
         `;

@@ -618,11 +618,14 @@ const Yearly2026 = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
 
         // 个性化称呼
         let greeting = '';
         if (options.name) {
-            greeting = isEn 
+            greeting = isJa 
+                ? `<div class="personal-greeting">🐾 ${options.name}さん、2026丙午年の運勢レポートだよ～</div>`
+                : isEn 
                 ? `<div class="personal-greeting">🐾 Dear ${options.name}, here's your 2026 Fire Horse Year fortune~</div>`
                 : `<div class="personal-greeting">🐾 亲爱的${options.name}，这是你的2026丙午年运势报告~</div>`;
         }
@@ -631,19 +634,27 @@ const Yearly2026 = {
         let accuracyNote = '';
         const filledFields = [options.hour !== null && options.hour !== undefined, options.gender, options.name].filter(Boolean).length;
         if (filledFields === 3) {
-            accuracyNote = isEn 
+            accuracyNote = isJa
+                ? '<div class="accuracy-note high">✨ 情報バッチリ！Kittyの占い超精密だよ！ニャー～</div>'
+                : isEn 
                 ? '<div class="accuracy-note high">✨ Great info! Kitty can be super accurate! Meow~</div>'
                 : '<div class="accuracy-note high">✨ 资料很全，Kitty算得超精准哦！喵喵喵~</div>';
         } else if (filledFields === 2) {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note medium">🐱 まあまあね、もうちょっと情報があれば完璧なのに～</div>'
+                : isEn
                 ? '<div class="accuracy-note medium">🐱 Not bad, a bit more info would be better~</div>'
                 : '<div class="accuracy-note medium">🐱 还可以哦，资料再多一点就更准了~</div>';
         } else if (filledFields === 1) {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note low">😼 情報少ないわね、大雑把にしか占えないよ～</div>'
+                : isEn
                 ? '<div class="accuracy-note low">😼 Info is sparse, Kitty can only give a rough reading~</div>'
                 : '<div class="accuracy-note low">😼 资料有点少哦，Kitty只能算个大概~</div>';
         } else {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note low">😿 誕生日だけ…次はもっと教えてよね～</div>'
+                : isEn
                 ? '<div class="accuracy-note low">😿 Only birthday... tell Kitty more next time~</div>'
                 : '<div class="accuracy-note low">😿 只知道生日...下次多告诉Kitty一些呗~</div>';
         }
@@ -653,103 +664,105 @@ const Yearly2026 = {
             taiSuiRelation.level === 'danger' ? 'danger' :
                 taiSuiRelation.level === 'warning' ? 'warning' : 'neutral';
         
-        // 英文版太岁关系翻译
-        const taiSuiRelationEn = this.getTaiSuiRelationEn(taiSuiRelation);
+        // 翻译版太岁关系
+        const taiSuiRelationTrans = isJa ? this.getTaiSuiRelationJa(taiSuiRelation) : this.getTaiSuiRelationEn(taiSuiRelation);
         
-        // 英文版生肖
-        const zodiacEn = this.getZodiacEn(userZodiac);
+        // 翻译版生肖
+        const zodiacTrans = isJa ? this.getZodiacJa(userZodiac) : this.getZodiacEn(userZodiac);
 
         let html = `
             ${greeting}
             ${accuracyNote}
             
             <div class="yearly-header">
-                <div class="year-badge">🐴 2026 ${isEn ? 'Fire Horse Year' : '丙午年'}</div>
+                <div class="year-badge">🐴 2026 ${isJa ? '丙午年' : isEn ? 'Fire Horse Year' : '丙午年'}</div>
                 <div class="zodiac-info">
-                    <span class="user-zodiac">${isEn ? zodiacEn : '属' + userZodiac}</span>
-                    ${dayMaster ? `<span class="day-master">${isEn ? 'Day Master' : '日主'}：${dayMaster}</span>` : ''}
+                    <span class="user-zodiac">${isJa ? zodiacTrans + '年' : isEn ? zodiacTrans : '属' + userZodiac}</span>
+                    ${dayMaster ? `<span class="day-master">${isJa ? '日主' : isEn ? 'Day Master' : '日主'}：${dayMaster}</span>` : ''}
                 </div>
             </div>
 
             <div class="taisui-card ${taiSuiClass}">
-                <div class="taisui-title">📿 ${isEn ? 'Tai Sui Relation' : '太岁关系'}</div>
-                <div class="taisui-relation">${isEn ? taiSuiRelationEn.relation : taiSuiRelation.relation}</div>
-                <div class="taisui-desc">${isEn ? taiSuiRelationEn.desc : taiSuiRelation.desc}</div>
+                <div class="taisui-title">📿 ${isJa ? '太歳との関係' : isEn ? 'Tai Sui Relation' : '太岁关系'}</div>
+                <div class="taisui-relation">${isJa || isEn ? taiSuiRelationTrans.relation : taiSuiRelation.relation}</div>
+                <div class="taisui-desc">${isJa || isEn ? taiSuiRelationTrans.desc : taiSuiRelation.desc}</div>
             </div>
 
             ${flowYearTenGod ? `
             <div class="tengod-card">
-                <div class="tengod-title">🔮 ${isEn ? 'Annual Ten God' : '流年十神'}</div>
-                <div class="tengod-name">${isEn ? `2026 Fire is your "${this.getTenGodEn(flowYearTenGod.godName)}"` : `2026丙火为你的「${flowYearTenGod.godName}」`}</div>
-                <div class="tengod-meaning">${isEn ? this.getTenGodMeaningEn(flowYearTenGod.godName) : flowYearTenGod.meaning}</div>
+                <div class="tengod-title">🔮 ${isJa ? '流年十神' : isEn ? 'Annual Ten God' : '流年十神'}</div>
+                <div class="tengod-name">${isJa ? `2026丙火はあなたの「${this.getTenGodJa(flowYearTenGod.godName)}」` : isEn ? `2026 Fire is your "${this.getTenGodEn(flowYearTenGod.godName)}"` : `2026丙火为你的「${flowYearTenGod.godName}」`}</div>
+                <div class="tengod-meaning">${isJa ? this.getTenGodMeaningJa(flowYearTenGod.godName) : isEn ? this.getTenGodMeaningEn(flowYearTenGod.godName) : flowYearTenGod.meaning}</div>
             </div>
             ` : ''}
 
             <div class="fortune-overview yearly">
                 <div class="fortune-item">
                     <div class="fortune-icon">📊</div>
-                    <div class="fortune-label">${isEn ? '2026 Overall' : '2026综合运势'}</div>
+                    <div class="fortune-label">${isJa ? '2026総合運' : isEn ? '2026 Overall' : '2026综合运势'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.overall)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💼</div>
-                    <div class="fortune-label">${isEn ? 'Career' : '事业运'}</div>
+                    <div class="fortune-label">${isJa ? '仕事運' : isEn ? 'Career' : '事业运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.career)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💰</div>
-                    <div class="fortune-label">${isEn ? 'Wealth' : '财运'}</div>
+                    <div class="fortune-label">${isJa ? '金運' : isEn ? 'Wealth' : '财运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.wealth)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💕</div>
-                    <div class="fortune-label">${isEn ? 'Love' : '感情运'}</div>
+                    <div class="fortune-label">${isJa ? '恋愛運' : isEn ? 'Love' : '感情运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.love)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">🏥</div>
-                    <div class="fortune-label">${isEn ? 'Health' : '健康运'}</div>
+                    <div class="fortune-label">${isJa ? '健康運' : isEn ? 'Health' : '健康运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.health)}</div>
                 </div>
             </div>
 
             <div class="analysis-card">
-                <h4>💼 ${isEn ? 'Career Advice' : '事业建议'}</h4>
-                <p>${isEn ? this.translateAdvices(advices.career, 'career') : advices.career.join('<br>')}</p>
+                <h4>💼 ${isJa ? '仕事アドバイス' : isEn ? 'Career Advice' : '事业建议'}</h4>
+                <p>${isJa ? this.translateAdvicesJa(advices.career, 'career') : isEn ? this.translateAdvices(advices.career, 'career') : advices.career.join('<br>')}</p>
             </div>
             <div class="analysis-card">
-                <h4>💰 ${isEn ? 'Wealth Advice' : '财运建议'}</h4>
-                <p>${isEn ? this.translateAdvices(advices.wealth, 'wealth') : advices.wealth.join('<br>')}</p>
+                <h4>💰 ${isJa ? '金運アドバイス' : isEn ? 'Wealth Advice' : '财运建议'}</h4>
+                <p>${isJa ? this.translateAdvicesJa(advices.wealth, 'wealth') : isEn ? this.translateAdvices(advices.wealth, 'wealth') : advices.wealth.join('<br>')}</p>
             </div>
             <div class="analysis-card">
-                <h4>💕 ${isEn ? 'Love Advice' : '感情建议'}</h4>
-                <p>${isEn ? this.translateAdvices(advices.love, 'love') : advices.love.join('<br>')}</p>
+                <h4>💕 ${isJa ? '恋愛アドバイス' : isEn ? 'Love Advice' : '感情建议'}</h4>
+                <p>${isJa ? this.translateAdvicesJa(advices.love, 'love') : isEn ? this.translateAdvices(advices.love, 'love') : advices.love.join('<br>')}</p>
             </div>
             <div class="analysis-card">
-                <h4>🏥 ${isEn ? 'Health Advice' : '健康建议'}</h4>
-                <p>${isEn ? this.translateAdvices(advices.health, 'health') : advices.health.join('<br>')}</p>
+                <h4>🏥 ${isJa ? '健康アドバイス' : isEn ? 'Health Advice' : '健康建议'}</h4>
+                <p>${isJa ? this.translateAdvicesJa(advices.health, 'health') : isEn ? this.translateAdvices(advices.health, 'health') : advices.health.join('<br>')}</p>
             </div>
 
             <div class="analysis-card">
-                <h4>🍀 ${isEn ? '2026 Lucky Tips' : '2026开运锦囊'}</h4>
-                <p>${isEn ? this.translateLuckyTips(luckyTips) : luckyTips.join('<br>')}</p>
+                <h4>🍀 ${isJa ? '2026開運のコツ' : isEn ? '2026 Lucky Tips' : '2026开运锦囊'}</h4>
+                <p>${isJa ? this.translateLuckyTipsJa(luckyTips) : isEn ? this.translateLuckyTips(luckyTips) : luckyTips.join('<br>')}</p>
             </div>
 
             <div class="cat-summary">
                 <div class="cat-face">(=^･ω･^=)</div>
-                <p>${isEn 
-                    ? `Meow~ 2026 Fire Horse Year is full of energy! ${zodiacEn} friend, ${taiSuiRelation.level === 'good' ? 'your fortune looks great!' : taiSuiRelation.level === 'danger' ? 'be careful with Tai Sui this year~' : 'stay steady and you\'ll be fine~'}`
+                <p>${isJa 
+                    ? `ニャ～2026丙午年は火のエネルギー満載！${zodiacTrans}年のあなた、${taiSuiRelation.level === 'good' ? '運勢いい感じだよ！' : taiSuiRelation.level === 'danger' ? '太歳に気をつけてね～' : '安定してれば大丈夫～'}`
+                    : isEn 
+                    ? `Meow~ 2026 Fire Horse Year is full of energy! ${zodiacTrans} friend, ${taiSuiRelation.level === 'good' ? 'your fortune looks great!' : taiSuiRelation.level === 'danger' ? 'be careful with Tai Sui this year~' : 'stay steady and you\'ll be fine~'}`
                     : `喵~ 2026丙午年火气旺盛，${userZodiac}宝宝${taiSuiRelation.level === 'good' ? '运势不错哦！' : taiSuiRelation.level === 'danger' ? '要注意化解太岁喵~' : '稳稳当当就好~'}`}</p>
-                <p>${isEn ? 'Remember, your destiny is in your own hands! Kitty believes you can rock 2026! Meow~' : '记住，命运掌握在自己手里！本喵相信你2026一定能行！喵~'}</p>
+                <p>${isJa ? '運命は自分で切り開くもの！2026年も頑張ってね！ニャ～' : isEn ? 'Remember, your destiny is in your own hands! Kitty believes you can rock 2026! Meow~' : '记住，命运掌握在自己手里！本喵相信你2026一定能行！喵~'}</p>
                 <p class="disclaimer-note" style="font-size: 0.85rem; color: #888; margin-top: 8px;">
-                    ${isEn ? '⚠️ For entertainment only, not for investment, career, or marriage decisions' : '⚠️ 以上分析仅供娱乐参考，不作为投资、求职、婚姻等重大决策依据'}
+                    ${isJa ? '⚠️ エンタメ参考用だよ、投資・就職・結婚などの重大な決断には使わないでね' : isEn ? '⚠️ For entertainment only, not for investment, career, or marriage decisions' : '⚠️ 以上分析仅供娱乐参考，不作为投资、求职、婚姻等重大决策依据'}
                 </p>
             </div>
 
             <div class="jump-section">
-                <div class="jump-hint">🐾 ${isEn ? 'Want to know what suits today?' : '想知道今天适合做什么？'}</div>
+                <div class="jump-hint">🐾 ${isJa ? '今日何が向いてるか知りたい？' : isEn ? 'Want to know what suits today?' : '想知道今天适合做什么？'}</div>
                 <button id="jump-to-daily-btn" class="submit-btn jump-daily-btn">
-                    <span>🌙 ${isEn ? 'Check Daily Fortune' : '查看今日运势'}</span>
+                    <span>🌙 ${isJa ? '今日の運勢をチェック' : isEn ? 'Check Daily Fortune' : '查看今日运势'}</span>
                     <span class="btn-glow"></span>
                 </button>
             </div>
@@ -912,6 +925,160 @@ const Yearly2026 = {
             '🧭 有利方位：南方、中央': '🧭 Favorable directions: South, Center',
             '🐯🐶 贵人生肖：虎、狗': '🐯🐶 Benefactor zodiac: Tiger, Dog',
             '🐴 多与属马的朋友交往，借运势': '🐴 Befriend Horse people to borrow their luck.'
+        };
+        
+        return tips.map(t => translations[t] || t).join('<br>');
+    },
+    
+    /**
+     * 日文版生肖
+     */
+    getZodiacJa(zodiac) {
+        const map = {
+            '鼠': '子', '牛': '丑', '虎': '寅', '兔': '卯',
+            '龙': '辰', '蛇': '巳', '马': '午', '羊': '未',
+            '猴': '申', '鸡': '酉', '狗': '戌', '猪': '亥'
+        };
+        return map[zodiac] || zodiac;
+    },
+    
+    /**
+     * 日文版太岁关系
+     */
+    getTaiSuiRelationJa(taiSui) {
+        const relationMap = {
+            '冲太岁': '太歳と衝突',
+            '害太岁': '太歳と害', 
+            '三合贵人': '三合（貴人あり）',
+            '相破': '破',
+            '平稳': '平穏',
+            '六合吉': '六合吉',
+            '本命年': '本命年'
+        };
+        const descMap = {
+            '子午相冲，2026年需格外小心，易有动荡变化': '子午相冲…2026年は要注意！変化が多いかもね～',
+            '丑午相害，人际关系易生矛盾，注意口舌是非': '丑午相害…人間関係にトラブルあるかも、口は災いの元よ～',
+            '寅午戌三合，有贵人相助，事业顺遂': '寅午戌三合！貴人に恵まれて仕事もスムーズ～',
+            '卯午相破，计划易受阻，需有备案': '卯午相破…計画が邪魔されやすいから、バックアップ用意してね～',
+            '与太岁无刑冲，运势平稳': '太歳との衝突なし、運勢は安定してるよ～',
+            '巳午同属火，气场相投，运势顺利': '巳午はどっちも火！気が合って運勢順調～',
+            '值太岁，本命年变数多，谨慎行事': '本命年！変数多いから慎重にね～',
+            '午未相合，人缘佳，有桃花运': '午未相合！人気者で恋愛運もアップ～',
+            '与太岁无刑冲，稳中有进': '太歳との衝突なし、着実に前進できるよ～',
+            '与太岁无刑冲，保持现状即可': '太歳との衝突なし、今のままでOK～',
+            '与太岁无刑冲，平顺度日': '太歳との衝突なし、穏やかに過ごせるよ～'
+        };
+        return {
+            relation: relationMap[taiSui.relation] || taiSui.relation,
+            desc: descMap[taiSui.desc] || taiSui.desc
+        };
+    },
+    
+    /**
+     * 日文版十神
+     */
+    getTenGodJa(godName) {
+        const map = {
+            '比肩': '比肩（ひけん）',
+            '劫财': '劫財（ごうざい）',
+            '食神': '食神（しょくじん）',
+            '伤官': '傷官（しょうかん）',
+            '偏印': '偏印（へんいん）',
+            '正印': '正印（せいいん）',
+            '偏官': '偏官（へんかん）',
+            '正官': '正官（せいかん）',
+            '偏财': '偏財（へんざい）',
+            '正财': '正財（せいざい）'
+        };
+        return map[godName] || godName;
+    },
+    
+    /**
+     * 日文版十神含义
+     */
+    getTenGodMeaningJa(godName) {
+        const map = {
+            '比肩': '競争と協力が共存、頑張り続けることが大事よ～',
+            '劫财': '財運が不安定…お金の管理しっかりね～',
+            '食神': '創造力爆発！アーティスティックな才能が光る～',
+            '伤官': '鋭い発言に注意、口は災いの元よ～',
+            '偏印': '思考が活発、研究や勉強に向いてるわ～',
+            '正印': '学業・仕事で貴人のサポートあり～',
+            '偏官': 'プレッシャー大きいけど、それを力に変えて～',
+            '正官': '仕事運上昇中、昇進のチャンスあるかも～',
+            '偏财': '臨時収入の予感！でも投資は慎重にね～',
+            '正财': '安定した収入、財運順調よ～'
+        };
+        return map[godName] || '';
+    },
+    
+    /**
+     * 日文版建议翻译
+     */
+    translateAdvicesJa(advices, type) {
+        const translations = {
+            // Career
+            '2026事业运旺，适合主动出击，争取晋升机会': '2026仕事運絶好調！積極的に動いて昇進を狙って～',
+            '可以尝试跳槽或创业，机遇难得': '転職や起業のチャンス！貴重なタイミングよ～',
+            '事业平稳发展，按部就班即可': '仕事は安定して発展中、コツコツやればOK～',
+            '多提升专业技能，厚积薄发': 'スキルアップに励んで、力を蓄えて～',
+            '事业运势欠佳，宜守不宜攻': '仕事運イマイチ…守りに徹して～',
+            '避免与上司冲突，低调行事': '上司とのトラブル避けて、おとなしくしてて～',
+            // Wealth
+            '财运亨通，可适度投资理财': '金運絶好調！程よく投資してもいいよ～',
+            '偏财运不错，可能有意外收获': '臨時収入の予感！思わぬボーナスあるかも～',
+            '正财稳定，控制消费即可': '安定収入、出費を抑えればOK～',
+            '不宜投机，稳健理财为上': '投機はダメ、堅実な資産運用を～',
+            '财运较弱，避免大额投资': '金運弱め…大きな投資は控えて～',
+            '注意防范破财风险，谨慎借贷': '散財に注意、借金は慎重にね～',
+            // Love
+            '桃花运旺，单身者易遇良缘': '恋愛運アップ！独身なら良い出会いあるかも～',
+            '已婚者感情甜蜜，可考虑添丁': '既婚者はラブラブ、子作りも考えてみて～',
+            '感情平稳，多沟通多陪伴': '恋愛は安定、コミュニケーションと一緒の時間を大切に～',
+            '单身者可主动出击，但不必强求': '独身なら積極的に！でも無理は禁物よ～',
+            '感情易生波折，需多包容理解': '恋愛にトラブルあるかも…寛容と理解が大事～',
+            '避免冲动决定，冷静处理矛盾': '衝動的な決断はダメ、冷静に対処して～',
+            // Health
+            '2026火气旺盛，注意心脏和血压': '2026年は火のエネルギー強め、心臓と血圧に注意～',
+            '金怕火克，多注意肺部和呼吸系统': '金は火に弱い…肺と呼吸器系に気をつけて～',
+            '木生火泄气，注意肝脏保养，避免熬夜': '木は火に消耗される…肝臓ケアして、夜更かし禁止～',
+            '水火相克，注意肾脏和泌尿系统': '水と火は相克…腎臓と泌尿器系に注意～',
+            '保持心态平和，避免情绪过激': '心穏やかに、感情的にならないでね～',
+            // Gender specific
+            '🏃 男性宜多运动，释放过剩火气': '🏃 男性は運動して余分な火のエネルギーを発散して～',
+            '🧘 女性宜静心养神，避免燥热': '🧘 女性は心を落ち着けて、イライラ注意～',
+            '💪 男士2026阳火年宜主动追求，展现魅力': '💪 男性は2026年積極的にアピールして、魅力を見せて～',
+            '💪 男士宜多些耐心，切勿急躁吓跑对方': '💪 男性は焦らないで、相手を怖がらせないように～',
+            '💐 女士2026年桃花旺，静待良缘': '💐 女性は2026年モテ期！いい人を待って～',
+            '💐 女士需擦亮眼睛，宁缺毋滥': '💐 女性は見る目を持って、妥協しないで～',
+            '👔 男性可大胆争取领导岗位': '👔 男性はリーダーポジションを積極的に狙って～',
+            '👔 男性宜韬光养晦，积累实力待时而动': '👔 男性は力を蓄えて、チャンスを待って～',
+            '👠 女性可尝试跨界发展，潜力无限': '👠 女性は異分野への挑戦もアリ、可能性無限大～',
+            '👠 女性宜稳守岗位，以柔克刚': '👠 女性は今のポジションをキープ、柔よく剛を制す～'
+        };
+        
+        return advices.map(a => translations[a] || a).join('<br>');
+    },
+    
+    /**
+     * 日文版开运建议
+     */
+    translateLuckyTipsJa(tips) {
+        const translations = {
+            '🙏 可在春节期间祈福化解太岁': '🙏 お正月に太歳のお祓いをしてね～',
+            '🔴 建议多穿红色衣物增强运势': '🔴 赤い服を着ると運気アップ～',
+            '💧 多穿白色、金色，或接触水元素': '💧 白や金色の服、水に触れると吉～',
+            '🧭 有利方位：西方、北方': '🧭 ラッキー方位：西、北',
+            '💧 多喝水，多去水边休息': '💧 お水をたくさん飲んで、水辺でリラックス～',
+            '🧭 有利方位：北方、东方': '🧭 ラッキー方位：北、東',
+            '🌳 多穿绿色，多接触植物': '🌳 緑の服を着て、植物に触れると吉～',
+            '🧭 有利方位：东方': '🧭 ラッキー方位：東',
+            '🔥 本命年火旺，多穿红色增强气场': '🔥 本命年は火が強い、赤を着てオーラ強化～',
+            '🧭 有利方位：南方': '🧭 ラッキー方位：南',
+            '🔥 火生土，2026对你有利': '🔥 火は土を生む、2026年はあなたに有利～',
+            '🧭 有利方位：南方、中央': '🧭 ラッキー方位：南、中央',
+            '🐯🐶 贵人生肖：虎、狗': '🐯🐶 貴人の干支：寅、戌',
+            '🐴 多与属马的朋友交往，借运势': '🐴 午年の友達と仲良くして運気をもらおう～'
         };
         
         return tips.map(t => translations[t] || t).join('<br>');

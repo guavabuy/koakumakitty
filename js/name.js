@@ -164,65 +164,72 @@ const NameAnalysis = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
         
         const getLuckClass = l => l.luck === 'good' ? 'good' : l.luck === 'bad' ? 'bad' : 'neutral';
         const getLuckText = l => {
+            if (isJa) return l.luck === 'good' ? '吉' : l.luck === 'bad' ? '凶' : '平';
             if (isEn) return l.luck === 'good' ? 'Good' : l.luck === 'bad' ? 'Bad' : 'Neutral';
             return l.luck === 'good' ? '吉' : l.luck === 'bad' ? '凶' : '平';
         };
+        
+        const strokeUnit = isJa ? '画' : isEn ? ' strokes' : '画';
 
         let html = '<div class="name-display"><div class="name-chars">';
         wuge.chars.forEach((c, i) => {
-            html += `<div class="name-char">${c}<span class="stroke-count">${wuge.strokes[i]}${isEn ? ' strokes' : '画'}</span></div>`;
+            html += `<div class="name-char">${c}<span class="stroke-count">${wuge.strokes[i]}${strokeUnit}</span></div>`;
         });
         html += '</div></div>';
 
         // 五格说明
         html += `<div class="analysis-card">
-            <h4>📚 ${isEn ? 'What is Wu Ge (Five Grids) Analysis?' : '什么是五格剖象法？'}</h4>
-            <p>${isEn ? 'Wu Ge Analysis uses Chinese character stroke counts to analyze name fortune. It reads name energy through five dimensions: 天格 (Tian Ge), 人格 (Ren Ge), 地格 (Di Ge), 外格 (Wai Ge), and 总格 (Zong Ge).' : '五格剖象法是根据汉字笔画数来分析姓名吉凶的方法。通过"天格、人格、地格、外格、总格"五个维度来解读姓名的能量。'}</p>
+            <h4>📚 ${isJa ? '五格剖象法とは？' : isEn ? 'What is Wu Ge (Five Grids) Analysis?' : '什么是五格剖象法？'}</h4>
+            <p>${isJa ? '五格剖象法は漢字の画数で姓名の吉凶を分析する方法だよ。「天格・人格・地格・外格・総格」の五つの角度から名前のエネルギーを読み解くの～' : isEn ? 'Wu Ge Analysis uses Chinese character stroke counts to analyze name fortune. It reads name energy through five dimensions: 天格 (Tian Ge), 人格 (Ren Ge), 地格 (Di Ge), 外格 (Wai Ge), and 总格 (Zong Ge).' : '五格剖象法是根据汉字笔画数来分析姓名吉凶的方法。通过"天格、人格、地格、外格、总格"五个维度来解读姓名的能量。'}</p>
         </div>`;
 
+        const gn = isJa ? { tian: '天格', ren: '人格', di: '地格', wai: '外格', zong: '総格' } 
+                 : { tian: '天格', ren: '人格', di: '地格', wai: '外格', zong: '总格' };
         html += `<div class="wuge-grid">
-            <div class="wuge-item"><div class="wuge-name">天格</div><div class="wuge-number">${wuge.tianGe}</div><span class="wuge-luck ${getLuckClass(luck.tian)}">${getLuckText(luck.tian)}</span></div>
-            <div class="wuge-item"><div class="wuge-name">人格</div><div class="wuge-number">${wuge.renGe}</div><span class="wuge-luck ${getLuckClass(luck.ren)}">${getLuckText(luck.ren)}</span></div>
-            <div class="wuge-item"><div class="wuge-name">地格</div><div class="wuge-number">${wuge.diGe}</div><span class="wuge-luck ${getLuckClass(luck.di)}">${getLuckText(luck.di)}</span></div>
-            <div class="wuge-item"><div class="wuge-name">外格</div><div class="wuge-number">${wuge.waiGe}</div><span class="wuge-luck ${getLuckClass(luck.wai)}">${getLuckText(luck.wai)}</span></div>
-            <div class="wuge-item"><div class="wuge-name">总格</div><div class="wuge-number">${wuge.zongGe}</div><span class="wuge-luck ${getLuckClass(luck.zong)}">${getLuckText(luck.zong)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">${gn.tian}</div><div class="wuge-number">${wuge.tianGe}</div><span class="wuge-luck ${getLuckClass(luck.tian)}">${getLuckText(luck.tian)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">${gn.ren}</div><div class="wuge-number">${wuge.renGe}</div><span class="wuge-luck ${getLuckClass(luck.ren)}">${getLuckText(luck.ren)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">${gn.di}</div><div class="wuge-number">${wuge.diGe}</div><span class="wuge-luck ${getLuckClass(luck.di)}">${getLuckText(luck.di)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">${gn.wai}</div><div class="wuge-number">${wuge.waiGe}</div><span class="wuge-luck ${getLuckClass(luck.wai)}">${getLuckText(luck.wai)}</span></div>
+            <div class="wuge-item"><div class="wuge-name">${gn.zong}</div><div class="wuge-number">${wuge.zongGe}</div><span class="wuge-luck ${getLuckClass(luck.zong)}">${getLuckText(luck.zong)}</span></div>
         </div>`;
 
         // 详细的五格解释
+        const numLabel = isJa ? '数理' : isEn ? 'Number' : '数理';
         html += `<div class="analysis-card">
-            <h4>👤 ${isEn ? '人格 (Ren Ge) - Main Fortune' : '人格分析（主运）'} - ${isEn ? 'Number' : '数理'}${wuge.renGe}</h4>
-            <p><strong>${isEn ? 'What is 人格?' : '什么是人格？'}</strong> ${isEn ? '人格 is the most important number in name analysis, representing your main personality and life direction.' : '人格是姓名中最重要的格数，代表你的主要性格和一生的运势走向，就像你的"人生主旋律"。'}</p>
-            <p><strong>${isEn ? 'Your 人格:' : '你的人格：'}</strong> ${luck.ren.meaning}</p>
-            <p>💡 ${luck.ren.luck === 'good' ? (isEn ? 'This is a very good number, beneficial for career and relationships!' : '这是一个很好的人格数理，有利于事业发展和人际关系！') : luck.ren.luck === 'bad' ? (isEn ? 'This number may bring some challenges, but effort can overcome them. Remember, destiny is in your hands!' : '这个人格数理可能会带来一些挑战，但通过努力可以克服。记住，命运掌握在自己手中！') : (isEn ? 'This is a neutral number. Steady development depends on personal effort.' : '这是一个中性的人格数理，平稳发展，关键看个人努力。')}</p>
+            <h4>👤 ${isJa ? '人格分析（主運）' : isEn ? '人格 (Ren Ge) - Main Fortune' : '人格分析（主运）'} - ${numLabel}${wuge.renGe}</h4>
+            <p><strong>${isJa ? '人格とは？' : isEn ? 'What is 人格?' : '什么是人格？'}</strong> ${isJa ? '人格は姓名で最も重要な数で、あなたの主な性格と人生の方向性を表すの、まさに「人生のメインテーマ」よ～' : isEn ? '人格 is the most important number in name analysis, representing your main personality and life direction.' : '人格是姓名中最重要的格数，代表你的主要性格和一生的运势走向，就像你的"人生主旋律"。'}</p>
+            <p><strong>${isJa ? 'あなたの人格：' : isEn ? 'Your 人格:' : '你的人格：'}</strong> ${luck.ren.meaning}</p>
+            <p>💡 ${luck.ren.luck === 'good' ? (isJa ? 'とても良い人格数理よ！仕事運と人間関係にプラスだわ～' : isEn ? 'This is a very good number, beneficial for career and relationships!' : '这是一个很好的人格数理，有利于事业发展和人际关系！') : luck.ren.luck === 'bad' ? (isJa ? 'ちょっと大変かもしれないけど、努力で乗り越えられるわ。運命は自分で決めるものよ！' : isEn ? 'This number may bring some challenges, but effort can overcome them. Remember, destiny is in your hands!' : '这个人格数理可能会带来一些挑战，但通过努力可以克服。记住，命运掌握在自己手中！') : (isJa ? '中性的な人格数理よ、安定した発展は個人の努力次第ね～' : isEn ? 'This is a neutral number. Steady development depends on personal effort.' : '这是一个中性的人格数理，平稳发展，关键看个人努力。')}</p>
         </div>`;
 
         html += `<div class="analysis-card">
-            <h4>🎯 ${isEn ? '总格 (Zong Ge) - Later Fortune' : '总格分析（后运）'} - ${isEn ? 'Number' : '数理'}${wuge.zongGe}</h4>
-            <p><strong>${isEn ? 'What is 总格?' : '什么是总格？'}</strong> ${isEn ? '总格 represents your fortune in later life, especially after age 48, and symbolizes overall life achievements.' : '总格代表你的后半生运势，尤其是48岁以后的人生走向，也象征你一生的总体成就。'}</p>
-            <p><strong>${isEn ? 'Your 总格:' : '你的总格：'}</strong> ${luck.zong.meaning}</p>
-            <p>💡 ${luck.zong.luck === 'good' ? (isEn ? 'Auspicious later fortune! Your early efforts will pay off in later years!' : '后运吉祥，晚年会比较顺遂，年轻时的努力会在后期得到回报！') : luck.zong.luck === 'bad' ? (isEn ? 'Later fortune may have fluctuations. Plan early for your later years.' : '后运可能有些起伏，建议提早规划，为晚年做好准备。') : (isEn ? 'Stable later fortune. Let things develop naturally.' : '后运平稳，顺其自然发展即可。')}</p>
+            <h4>🎯 ${isJa ? '総格分析（後運）' : isEn ? '总格 (Zong Ge) - Later Fortune' : '总格分析（后运）'} - ${numLabel}${wuge.zongGe}</h4>
+            <p><strong>${isJa ? '総格とは？' : isEn ? 'What is 总格?' : '什么是总格？'}</strong> ${isJa ? '総格は後半生の運勢を表すの、特に48歳以降の人生と、一生の総合的な成果を象徴してるよ～' : isEn ? '总格 represents your fortune in later life, especially after age 48, and symbolizes overall life achievements.' : '总格代表你的后半生运势，尤其是48岁以后的人生走向，也象征你一生的总体成就。'}</p>
+            <p><strong>${isJa ? 'あなたの総格：' : isEn ? 'Your 总格:' : '你的总格：'}</strong> ${luck.zong.meaning}</p>
+            <p>💡 ${luck.zong.luck === 'good' ? (isJa ? '後運吉祥！若い頃の努力が晩年に実を結ぶわよ～' : isEn ? 'Auspicious later fortune! Your early efforts will pay off in later years!' : '后运吉祥，晚年会比较顺遂，年轻时的努力会在后期得到回报！') : luck.zong.luck === 'bad' ? (isJa ? '後運に波があるかも、早めに老後の計画を立てておいてね～' : isEn ? 'Later fortune may have fluctuations. Plan early for your later years.' : '后运可能有些起伏，建议提早规划，为晚年做好准备。') : (isJa ? '後運は安定してるわ、自然に任せればOK～' : isEn ? 'Stable later fortune. Let things develop naturally.' : '后运平稳，顺其自然发展即可。')}</p>
         </div>`;
 
         html += `<div class="analysis-card">
-            <h4>🌱 ${isEn ? '地格 (Di Ge) - Early Fortune' : '地格分析（前运）'} - ${isEn ? 'Number' : '数理'}${wuge.diGe}</h4>
-            <p><strong>${isEn ? 'What is 地格?' : '什么是地格？'}</strong> ${isEn ? '地格 represents your fortune in early life (before 36), including education, early career, and relationship foundations.' : '地格代表你的前半生运势（36岁前），包括学业、早期事业和感情基础。'}</p>
-            <p><strong>${isEn ? 'Your 地格:' : '你的地格：'}</strong> ${luck.di.meaning}</p>
+            <h4>🌱 ${isJa ? '地格分析（前運）' : isEn ? '地格 (Di Ge) - Early Fortune' : '地格分析（前运）'} - ${numLabel}${wuge.diGe}</h4>
+            <p><strong>${isJa ? '地格とは？' : isEn ? 'What is 地格?' : '什么是地格？'}</strong> ${isJa ? '地格は前半生の運勢（36歳まで）を表すの、学業、初期キャリア、恋愛の基礎を含むわよ～' : isEn ? '地格 represents your fortune in early life (before 36), including education, early career, and relationship foundations.' : '地格代表你的前半生运势（36岁前），包括学业、早期事业和感情基础。'}</p>
+            <p><strong>${isJa ? 'あなたの地格：' : isEn ? 'Your 地格:' : '你的地格：'}</strong> ${luck.di.meaning}</p>
         </div>`;
 
         html += `<div class="analysis-card">
-            <h4>🤝 ${isEn ? '外格 (Wai Ge) - Social Fortune' : '外格分析（副运）'} - ${isEn ? 'Number' : '数理'}${wuge.waiGe}</h4>
-            <p><strong>${isEn ? 'What is 外格?' : '什么是外格？'}</strong> ${isEn ? '外格 represents your social relationships and environment, reflecting how others see you and your social fortune.' : '外格代表你的人际关系和社会环境，反映别人眼中的你以及你的社交运势。'}</p>
-            <p><strong>${isEn ? 'Your 外格:' : '你的外格：'}</strong> ${luck.wai.meaning}</p>
+            <h4>🤝 ${isJa ? '外格分析（副運）' : isEn ? '外格 (Wai Ge) - Social Fortune' : '外格分析（副运）'} - ${numLabel}${wuge.waiGe}</h4>
+            <p><strong>${isJa ? '外格とは？' : isEn ? 'What is 外格?' : '什么是外格？'}</strong> ${isJa ? '外格は人間関係と社会環境を表すの、他人から見たあなたと社交運を反映してるわよ～' : isEn ? '外格 represents your social relationships and environment, reflecting how others see you and your social fortune.' : '外格代表你的人际关系和社会环境，反映别人眼中的你以及你的社交运势。'}</p>
+            <p><strong>${isJa ? 'あなたの外格：' : isEn ? 'Your 外格:' : '你的外格：'}</strong> ${luck.wai.meaning}</p>
         </div>`;
 
         html += `<div class="analysis-card">
-            <h4>🏠 ${isEn ? '天格 (Tian Ge) - Ancestral Fortune' : '天格分析（祖运）'} - ${isEn ? 'Number' : '数理'}${wuge.tianGe}</h4>
-            <p><strong>${isEn ? 'What is 天格?' : '什么是天格？'}</strong> ${isEn ? '天格 represents the fortune passed down from ancestors, related to family background and innate conditions.' : '天格代表祖先留给你的运势，与你的家族背景和先天条件有关。通常不直接影响命运，但会间接影响你的起点。'}</p>
-            <p><strong>${isEn ? 'Your 天格:' : '你的天格：'}</strong> ${luck.tian.meaning}</p>
-            <p>💡 ${isEn ? '天格 is determined by surname and cannot be changed, so don\'t worry too much about it.' : '天格是由姓氏决定的，无法改变，因此不必过于在意。'}</p>
+            <h4>🏠 ${isJa ? '天格分析（祖運）' : isEn ? '天格 (Tian Ge) - Ancestral Fortune' : '天格分析（祖运）'} - ${numLabel}${wuge.tianGe}</h4>
+            <p><strong>${isJa ? '天格とは？' : isEn ? 'What is 天格?' : '什么是天格？'}</strong> ${isJa ? '天格はご先祖様から受け継いだ運勢で、家庭環境と先天的条件に関係してるの。直接運命には影響しないけど、スタートラインに間接的に影響するわ～' : isEn ? '天格 represents the fortune passed down from ancestors, related to family background and innate conditions.' : '天格代表祖先留给你的运势，与你的家族背景和先天条件有关。通常不直接影响命运，但会间接影响你的起点。'}</p>
+            <p><strong>${isJa ? 'あなたの天格：' : isEn ? 'Your 天格:' : '你的天格：'}</strong> ${luck.tian.meaning}</p>
+            <p>💡 ${isJa ? '天格は姓で決まるから変えられないの、あまり気にしなくていいわよ～' : isEn ? '天格 is determined by surname and cannot be changed, so don\'t worry too much about it.' : '天格是由姓氏决定的，无法改变，因此不必过于在意。'}</p>
         </div>`;
 
         // 综合建议
@@ -231,27 +238,35 @@ const NameAnalysis = {
 
         let overallAdvice = '';
         if (goodCount >= 4) {
-            overallAdvice = isEn 
+            overallAdvice = isJa 
+                ? `🎉 おめでとう！あなたの姓名五格はとても吉（${goodCount}個の吉格）よ！運勢を後押ししてくれるいい名前だわ～`
+                : isEn 
                 ? `🎉 Congratulations! Your name's Wu Ge is very auspicious (${goodCount} good grids). This is a great name that brings smooth fortune and aids life development.`
                 : `🎉 恭喜！您的姓名五格整体非常吉利（${goodCount}个吉格），是一个很好的名字！这个名字能为您带来顺遂的运势，助力人生发展。`;
         } else if (goodCount >= 2) {
-            overallAdvice = isEn
+            overallAdvice = isJa
+                ? `✨ あなたの姓名五格には${goodCount}個の吉格があるわ、全体的に悪くないわよ。努力が必要な部分もあるけど、運勢は上向きよ～`
+                : isEn
                 ? `✨ Your name has ${goodCount} good grids, overall quite nice. Some areas need extra effort, but the overall trend is positive.`
                 : `✨ 您的姓名五格中有${goodCount}个吉格，整体还不错。有些方面需要自己多加努力，但总体运势是正向的。`;
         } else if (badCount >= 3) {
-            overallAdvice = isEn
+            overallAdvice = isJa
+                ? `💪 注意が必要な格数が${badCount}個あるけど、心配しないで！姓名は参考程度、選択と努力が運命を決めるのよ。ポジティブでいれば何でも可能！`
+                : isEn
                 ? `💪 Your name has ${badCount} grids that need attention. But remember, names are just reference. Your choices and efforts truly determine destiny. Stay positive, anything is possible!`
                 : `💪 您的姓名五格中有${badCount}个需要注意的格数。不过请记住，姓名只是参考，真正决定命运的是你的选择和努力。保持积极心态，一切皆有可能！`;
         } else {
-            overallAdvice = isEn
+            overallAdvice = isJa
+                ? `☯️ あなたの姓名五格は中性的で、特に目立った吉凶はないわ。つまり人生は自分次第！努力と選択が未来を決めるのよ～`
+                : isEn
                 ? `☯️ Your name's Wu Ge is relatively neutral, with no particularly outstanding good or bad omens. This means your life is in your own hands - effort and choices will determine your future.`
                 : `☯️ 您的姓名五格比较中性，没有特别突出的吉凶。这意味着你的人生掌握在自己手中，努力和选择会决定你的未来走向。`;
         }
 
         html += `<div class="analysis-card">
-            <h4>📋 ${isEn ? 'Overall Evaluation' : '综合评价'}</h4>
+            <h4>📋 ${isJa ? '総合評価' : isEn ? 'Overall Evaluation' : '综合评价'}</h4>
             <p>${overallAdvice}</p>
-            <p>${isEn ? '⚠️ Note: Name analysis is just one dimension of life reference. It cannot fully determine destiny. Mindset, effort, and choices are the keys to life!' : '⚠️ 温馨提示：姓名学只是人生的一个参考维度，不能完全决定命运。心态、努力、选择才是人生的关键！'}</p>
+            <p>${isJa ? '⚠️ 姓名学は人生の参考程度よ。運命を完全に決めるものじゃないの。心構え・努力・選択が人生のカギよ！' : isEn ? '⚠️ Note: Name analysis is just one dimension of life reference. It cannot fully determine destiny. Mindset, effort, and choices are the keys to life!' : '⚠️ 温馨提示：姓名学只是人生的一个参考维度，不能完全决定命运。心态、努力、选择才是人生的关键！'}</p>
         </div>`;
 
         // 添加点赞分享按钮

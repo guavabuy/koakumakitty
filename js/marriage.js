@@ -726,6 +726,7 @@ const Marriage = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
         
         // 英文版等级和建议
         const levelEn = {
@@ -736,6 +737,16 @@ const Marriage = {
             '💔 需要磨合': '💔 Needs Work',
             '🔮 挑战满满': '🔮 Challenging'
         };
+        
+        // 日本語版等级
+        const levelJa = {
+            '💖 天作之合': '💖 運命のカップル',
+            '💕 情投意合': '💕 相性バッチリ',
+            '💗 相知相惜': '💗 互いを理解',
+            '💓 细水长流': '💓 ゆっくり愛を育む',
+            '💔 需要磨合': '💔 すり合わせが必要',
+            '🔮 挑战满满': '🔮 チャレンジいっぱい'
+        };
 
         let html = '';
 
@@ -745,42 +756,45 @@ const Marriage = {
                 <div class="score-display">
                     <div class="score-circle ${this.getScoreClass(totalScore)}">
                         <span class="score-number">${totalScore}</span>
-                        <span class="score-label">${isEn ? 'Compatibility' : '综合匹配'}</span>
+                        <span class="score-label">${isJa ? '相性度' : isEn ? 'Compatibility' : '综合匹配'}</span>
                     </div>
                 </div>
-                <h3 class="match-level">${isEn ? (levelEn[overallLevel] || overallLevel) : overallLevel}</h3>
+                <h3 class="match-level">${isJa ? (levelJa[overallLevel] || overallLevel) : isEn ? (levelEn[overallLevel] || overallLevel) : overallLevel}</h3>
                 <p class="match-advice">${overallAdvice}</p>
             </div>
         `;
 
         // 双方信息对比
+        const dayPillarLabel = isJa ? '日柱' : isEn ? 'Day Pillar' : '日柱';
+        const guaSuffix = isJa ? '卦' : isEn ? ' Gua' : '卦';
         html += `
             <div class="analysis-card">
-                <h4>👫 ${isEn ? 'BaZi Comparison' : '八字命盘对比'}</h4>
+                <h4>👫 ${isJa ? '八字命盤の比較' : isEn ? 'BaZi Comparison' : '八字命盘对比'}</h4>
                 <div class="couple-info">
                     <div class="person-card">
                         <div class="person-emoji">${person1.gender === 'male' ? '👦' : '👧'}</div>
                         <div class="person-name">${person1.name}</div>
                         <div class="person-zodiac">${person1.zodiacEmoji} ${person1.zodiac}</div>
-                        <div class="person-bazi">${isEn ? 'Day Pillar' : '日柱'}：${person1.dayPillar}</div>
-                        <div class="person-gua">${person1.mingGua}${isEn ? ' Gua' : '卦'}·${this.guaElements[person1.mingGua]}</div>
+                        <div class="person-bazi">${dayPillarLabel}：${person1.dayPillar}</div>
+                        <div class="person-gua">${person1.mingGua}${guaSuffix}·${this.guaElements[person1.mingGua]}</div>
                     </div>
                     <div class="heart-connector">💕</div>
                     <div class="person-card">
                         <div class="person-emoji">${person2.gender === 'male' ? '👦' : '👧'}</div>
                         <div class="person-name">${person2.name}</div>
                         <div class="person-zodiac">${person2.zodiacEmoji} ${person2.zodiac}</div>
-                        <div class="person-bazi">${isEn ? 'Day Pillar' : '日柱'}：${person2.dayPillar}</div>
-                        <div class="person-gua">${person2.mingGua}${isEn ? ' Gua' : '卦'}·${this.guaElements[person2.mingGua]}</div>
+                        <div class="person-bazi">${dayPillarLabel}：${person2.dayPillar}</div>
+                        <div class="person-gua">${person2.mingGua}${guaSuffix}·${this.guaElements[person2.mingGua]}</div>
                     </div>
                 </div>
             </div>
         `;
 
         // 八字配对分析
+        const ptsSuffix = isJa ? '点' : isEn ? 'pts' : '分';
         html += `
             <div class="analysis-card">
-                <h4>☯️ ${isEn ? 'BaZi Compatibility' : '八字配对分析'} <span class="score-badge">${baziResult.score}${isEn ? 'pts' : '分'}</span></h4>
+                <h4>☯️ ${isJa ? '八字相性分析' : isEn ? 'BaZi Compatibility' : '八字配对分析'} <span class="score-badge">${baziResult.score}${ptsSuffix}</span></h4>
                 <div class="bazi-match">
                     <span class="bazi-pair">${person1.dayPillar}</span>
                     <span class="bazi-vs">×</span>
@@ -798,7 +812,7 @@ const Marriage = {
         // 生肖配对分析
         html += `
             <div class="analysis-card">
-                <h4>🐾 ${isEn ? 'Zodiac Compatibility' : '生肖配对分析'} <span class="score-badge">${zodiacResult.score}${isEn ? 'pts' : '分'}</span></h4>
+                <h4>🐾 ${isJa ? '干支相性分析' : isEn ? 'Zodiac Compatibility' : '生肖配对分析'} <span class="score-badge">${zodiacResult.score}${ptsSuffix}</span></h4>
                 <div class="zodiac-match">
                     <span class="zodiac-pair">${person1.zodiacEmoji} ${person1.zodiac}</span>
                     <span class="zodiac-vs">×</span>
@@ -816,7 +830,7 @@ const Marriage = {
         // 命卦配对分析
         html += `
             <div class="analysis-card">
-                <h4>🏠 ${isEn ? 'Ming Gua Compatibility' : '命卦配对分析'} <span class="score-badge">${guaResult.score}${isEn ? 'pts' : '分'}</span></h4>
+                <h4>🏠 ${isJa ? '命卦相性分析' : isEn ? 'Ming Gua Compatibility' : '命卦配对分析'} <span class="score-badge">${guaResult.score}${ptsSuffix}</span></h4>
                 <div class="gua-match">
                     <span class="gua-pair">${guaResult.gua1}${isEn ? ' Gua' : '卦'}(${guaResult.element1})</span>
                     <span class="gua-vs">×</span>
@@ -834,7 +848,7 @@ const Marriage = {
         // 姓名配对分析
         html += `
             <div class="analysis-card">
-                <h4>📝 ${isEn ? 'Name Compatibility' : '姓名配对分析'} <span class="score-badge">${nameResult.score}${isEn ? 'pts' : '分'}</span></h4>
+                <h4>📝 ${isJa ? '姓名相性分析' : isEn ? 'Name Compatibility' : '姓名配对分析'} <span class="score-badge">${nameResult.score}${ptsSuffix}</span></h4>
                 <div class="name-match">
                     <span class="name-pair">${person1.name}</span>
                     <span class="name-vs">×</span>
@@ -852,22 +866,22 @@ const Marriage = {
         // 相处建议
         html += `
             <div class="analysis-card">
-                <h4>💝 ${isEn ? 'Relationship Tips' : '相处小建议'}</h4>
+                <h4>💝 ${isJa ? '仲良しのコツ' : isEn ? 'Relationship Tips' : '相处小建议'}</h4>
                 <div class="tips-list">
-                    ${this.generateRelationshipTips(result, isEn)}
+                    ${isJa ? this.generateRelationshipTipsJa(result) : this.generateRelationshipTips(result, isEn)}
                 </div>
             </div>
         `;
 
-        // 温馨提示与免责声明
+        // 温馨提示与免責声明
         html += `
             <div class="analysis-card">
-                <h4>🌸 ${isEn ? 'Kitty\'s Whisper' : 'Kitty悄悄话'}</h4>
-                <p>${isEn ? 'Destiny matching is just a reference~ True love is built by two hearts working together!' : '命理配对只是参考啦~ 真正的感情是靠两个人用心经营的！'}</p>
-                <p>${isEn ? 'No matter what destiny says, as long as you truly love each other, respect and grow together, happiness awaits!' : '不管命理怎么说，只要你们真心相爱、互相尊重、共同成长，就一定能收获幸福！'}</p>
-                <p style="color: var(--color-pink-hot);">${isEn ? '💕 Believe in love, love bravely~ 💕' : '💕 相信爱情，勇敢去爱~ 💕'}</p>
+                <h4>🌸 ${isJa ? 'Kittyのひそひそ話' : isEn ? 'Kitty\'s Whisper' : 'Kitty悄悄话'}</h4>
+                <p>${isJa ? '命理相性は参考程度よ～本当の愛は二人で育てるものなの！' : isEn ? 'Destiny matching is just a reference~ True love is built by two hearts working together!' : '命理配对只是参考啦~ 真正的感情是靠两个人用心经营的！'}</p>
+                <p>${isJa ? '命理が何と言っても、本当に愛し合って、尊重し合って、一緒に成長すれば、きっと幸せになれるわ！' : isEn ? 'No matter what destiny says, as long as you truly love each other, respect and grow together, happiness awaits!' : '不管命理怎么说，只要你们真心相爱、互相尊重、共同成长，就一定能收获幸福！'}</p>
+                <p style="color: var(--color-pink-hot);">${isJa ? '💕 愛を信じて、勇気を持って愛して～💕' : isEn ? '💕 Believe in love, love bravely~ 💕' : '💕 相信爱情，勇敢去爱~ 💕'}</p>
                 <p class="disclaimer-note" style="margin-top: 12px; font-size: 0.85rem; color: #888;">
-                    ${isEn ? '⚠️ This analysis is for entertainment only, not for marriage decisions. True destiny requires nurturing~' : '⚠️ 本分析仅供娱乐参考，不作为婚恋决策依据。真正的缘分需要双方用心经营~'}
+                    ${isJa ? '⚠️ この分析はエンタメ参考用だよ、恋愛・結婚の決断には使わないでね。本当の縁は二人で育てるものよ～' : isEn ? '⚠️ This analysis is for entertainment only, not for marriage decisions. True destiny requires nurturing~' : '⚠️ 本分析仅供娱乐参考，不作为婚恋决策依据。真正的缘分需要双方用心经营~'}
                 </p>
             </div>
         `;
@@ -906,6 +920,36 @@ const Marriage = {
         tips.push('Schedule regular date nights to keep the romance alive');
         tips.push('Express your love openly, don\'t make your partner guess');
         tips.push('Respect each other\'s personal space and hobbies');
+
+        return tips.map(tip => `<div class="tip-item">💫 ${tip}</div>`).join('');
+    },
+    
+    /**
+     * 生成相处建议（日语版）
+     */
+    generateRelationshipTipsJa(result) {
+        const tips = [];
+        const { baziResult, zodiacResult, guaResult } = result;
+
+        if (baziResult.score >= 85) {
+            tips.push('八字の相性バッチリ！この特別な縁を大切にしてね～');
+        } else if (baziResult.score < 55) {
+            tips.push('八字に違いがあるわ、お互いの長所を見つけることに集中して～');
+        }
+
+        if (zodiacResult.score < 50) {
+            tips.push('意見が合わない時は冷静に話し合って、感情的にならないでね～');
+        }
+
+        const isEast1 = this.eastLifeGuas.includes(result.person1.mingGua);
+        const isEast2 = this.eastLifeGuas.includes(result.person2.mingGua);
+        if (isEast1 !== isEast2) {
+            tips.push('一緒に住むなら風水の専門家に相談するといいわよ～');
+        }
+
+        tips.push('定期的にデートして、ロマンスを保ってね～');
+        tips.push('愛情は素直に表現して、相手に推測させないで～');
+        tips.push('お互いのプライベートな時間と趣味を尊重してね～');
 
         return tips.map(tip => `<div class="tip-item">💫 ${tip}</div>`).join('');
     }

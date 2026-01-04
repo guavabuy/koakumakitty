@@ -879,27 +879,36 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
         
         // 检测语言 - 保留中文命理符号
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
+        
+        // 四柱标签翻译
+        const pillarLabels = isJa 
+            ? { year: '年柱', month: '月柱', day: '日柱', hour: '時柱' }
+            : { year: '年柱', month: '月柱', day: '日柱', hour: '时柱' };
+        
+        // 计数单位
+        const countSuffix = isJa ? '個' : isEn ? '' : '个';
 
         // 四柱标签（保留中文）和五行都保留原样
         let html = `
             <div class="bazi-pillars">
                 <div class="pillar">
-                    <div class="pillar-label">年柱</div>
+                    <div class="pillar-label">${pillarLabels.year}</div>
                     <div class="pillar-stem">${pillars.year.stem}</div>
                     <div class="pillar-branch">${pillars.year.branch}</div>
                 </div>
                 <div class="pillar">
-                    <div class="pillar-label">月柱</div>
+                    <div class="pillar-label">${pillarLabels.month}</div>
                     <div class="pillar-stem">${pillars.month.stem}</div>
                     <div class="pillar-branch">${pillars.month.branch}</div>
                 </div>
                 <div class="pillar">
-                    <div class="pillar-label">日柱</div>
+                    <div class="pillar-label">${pillarLabels.day}</div>
                     <div class="pillar-stem">${pillars.day.stem}</div>
                     <div class="pillar-branch">${pillars.day.branch}</div>
                 </div>
                 <div class="pillar">
-                    <div class="pillar-label">时柱</div>
+                    <div class="pillar-label">${pillarLabels.hour}</div>
                     <div class="pillar-stem">${pillars.hour.stem}</div>
                     <div class="pillar-branch">${pillars.hour.branch}</div>
                 </div>
@@ -908,23 +917,23 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
             <div class="wuxing-chart">
                 <div class="wuxing-item">
                     <div class="wuxing-symbol wood">木</div>
-                    <div class="wuxing-count">${result.elements['木']}${isEn ? '' : '个'}</div>
+                    <div class="wuxing-count">${result.elements['木']}${countSuffix}</div>
                 </div>
                 <div class="wuxing-item">
                     <div class="wuxing-symbol fire">火</div>
-                    <div class="wuxing-count">${result.elements['火']}${isEn ? '' : '个'}</div>
+                    <div class="wuxing-count">${result.elements['火']}${countSuffix}</div>
                 </div>
                 <div class="wuxing-item">
                     <div class="wuxing-symbol earth">土</div>
-                    <div class="wuxing-count">${result.elements['土']}${isEn ? '' : '个'}</div>
+                    <div class="wuxing-count">${result.elements['土']}${countSuffix}</div>
                 </div>
                 <div class="wuxing-item">
                     <div class="wuxing-symbol metal">金</div>
-                    <div class="wuxing-count">${result.elements['金']}${isEn ? '' : '个'}</div>
+                    <div class="wuxing-count">${result.elements['金']}${countSuffix}</div>
                 </div>
                 <div class="wuxing-item">
                     <div class="wuxing-symbol water">水</div>
-                    <div class="wuxing-count">${result.elements['水']}${isEn ? '' : '个'}</div>
+                    <div class="wuxing-count">${result.elements['水']}${countSuffix}</div>
                 </div>
             </div>
         `;
@@ -932,8 +941,8 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
         interpretations.forEach(interp => {
             html += `
                 <div class="analysis-card">
-                    <h4>${isEn ? this.translateInterpTitle(interp.title) : interp.title}</h4>
-                    <p>${isEn ? this.translateInterpContent(interp.content) : interp.content}</p>
+                    <h4>${isJa ? this.translateInterpTitleJa(interp.title) : isEn ? this.translateInterpTitle(interp.title) : interp.title}</h4>
+                    <p>${isJa ? this.translateInterpContentJa(interp.content) : isEn ? this.translateInterpContent(interp.content) : interp.content}</p>
                 </div>
             `;
         });
@@ -1023,17 +1032,18 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
         if (!daYunInfo || !daYunInfo.daYunList) return '';
         
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
 
         const { direction, qiYun, daYunList, currentDaYun } = daYunInfo;
 
         let html = `
             <div class="analysis-card dayun-section">
-                <h4>🔮 ${isEn ? 'Da Yun (10-Year Luck Cycles)' : '大运推演'}</h4>
+                <h4>🔮 ${isJa ? '大運推演' : isEn ? 'Da Yun (10-Year Luck Cycles)' : '大运推演'}</h4>
                 
                 <div class="qiyun-info">
-                    <p><strong>${isEn ? 'Start Age:' : '起运信息：'}</strong>${isEn ? this.translateDaYunInfo(qiYun.explanation) : qiYun.explanation}</p>
-                    <p><strong>${isEn ? 'Direction:' : '大运方向：'}</strong>${isEn ? this.translateDaYunInfo(direction.explanation) : direction.explanation}</p>
-                    <p class="rule-ref" style="font-size: 0.8rem; color: #888;">📚 ${isEn ? 'Source:' : '规则来源：'}${direction.ruleRef}, ${qiYun.ruleRef}</p>
+                    <p><strong>${isJa ? '起運情報：' : isEn ? 'Start Age:' : '起运信息：'}</strong>${isJa ? this.translateDaYunInfoJa(qiYun.explanation) : isEn ? this.translateDaYunInfo(qiYun.explanation) : qiYun.explanation}</p>
+                    <p><strong>${isJa ? '大運方向：' : isEn ? 'Direction:' : '大运方向：'}</strong>${isJa ? this.translateDaYunInfoJa(direction.explanation) : isEn ? this.translateDaYunInfo(direction.explanation) : direction.explanation}</p>
+                    <p class="rule-ref" style="font-size: 0.8rem; color: #888;">📚 ${isJa ? '規則出典：' : isEn ? 'Source:' : '规则来源：'}${direction.ruleRef}, ${qiYun.ruleRef}</p>
                 </div>
 
                 <div class="dayun-timeline" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
@@ -1041,6 +1051,8 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
 
         daYunList.forEach((dy, index) => {
             const isCurrent = currentDaYun && dy.step === currentDaYun.step;
+            const stepLabel = isJa ? `第${dy.step}運` : isEn ? `Cycle ${dy.step}` : `第${dy.step}步`;
+            const nowLabel = isJa ? '現在' : isEn ? 'Now' : '当前';
             html += `
                 <div class="dayun-item" style="
                     flex: 0 0 calc(20% - 10px);
@@ -1052,11 +1064,11 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
                     color: ${isCurrent ? 'white' : 'inherit'};
                     border: ${isCurrent ? '2px solid #ff6b6b' : '1px solid #ddd'};
                 ">
-                    <div style="font-size: 0.75rem; color: ${isCurrent ? 'rgba(255,255,255,0.8)' : '#888'};">${isEn ? 'Cycle' : '第'}${dy.step}${isEn ? '' : '步'}</div>
+                    <div style="font-size: 0.75rem; color: ${isCurrent ? 'rgba(255,255,255,0.8)' : '#888'};">${stepLabel}</div>
                     <div style="font-size: 1.2rem; font-weight: bold; margin: 5px 0;">${dy.pillar}</div>
                     <div style="font-size: 0.8rem; color: ${isCurrent ? 'rgba(255,255,255,0.9)' : '#666'};">${dy.tenGod}</div>
                     <div style="font-size: 0.7rem; margin-top: 5px;">${dy.ageRange}</div>
-                    ${isCurrent ? `<div style="font-size: 0.7rem; margin-top: 3px;">← ${isEn ? 'Now' : '当前'}</div>` : ''}
+                    ${isCurrent ? `<div style="font-size: 0.7rem; margin-top: 3px;">← ${nowLabel}</div>` : ''}
                 </div>
             `;
         });
@@ -1065,7 +1077,7 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
                 </div>
                 
                 <p class="disclaimer-note" style="font-size: 0.85rem; color: #888; margin-top: 12px;">
-                    ${isEn ? '⚠️ Da Yun analysis is based on traditional theory, for reference only' : '⚠️ 大运分析基于传统命理理论，仅供参考，不作为重大决策依据'}
+                    ${isJa ? '⚠️ 大運分析は伝統的な命理学に基づく参考情報だよ、重大な決断には使わないでね～' : isEn ? '⚠️ Da Yun analysis is based on traditional theory, for reference only' : '⚠️ 大运分析基于传统命理理论，仅供参考，不作为重大决策依据'}
                 </p>
             </div>
         `;
@@ -1091,6 +1103,81 @@ ${weakElements.map(el => elementRemedies[el]).join('\n\n')}
         let result = text;
         for (const [zh, en] of Object.entries(map)) {
             result = result.replace(new RegExp(zh, 'g'), en);
+        }
+        return result;
+    },
+    
+    /**
+     * 日语翻译大运信息
+     */
+    translateDaYunInfoJa(text) {
+        const map = {
+            '顺排': '順行',
+            '逆排': '逆行',
+            '阳年男命': '陽年男命',
+            '阴年女命': '陰年女命',
+            '阳年女命': '陽年女命',
+            '阴年男命': '陰年男命',
+            '岁起运': '歳から大運開始',
+            '月': 'ヶ月',
+            '天': '日'
+        };
+        let result = text;
+        for (const [zh, ja] of Object.entries(map)) {
+            result = result.replace(new RegExp(zh, 'g'), ja);
+        }
+        return result;
+    },
+    
+    /**
+     * 日语翻译解读标题
+     */
+    translateInterpTitleJa(title) {
+        const map = {
+            '日主特质': '日主の特質',
+            '命格强弱分析': '命格の強弱分析',
+            '五行调节指南': '五行調節ガイド',
+            '生肖性格': '干支の性格',
+            '十神格局': '十神格局',
+            '事业财运指南': '仕事・金運ガイド',
+            '健康养生建议': '健康アドバイス',
+            '🐱 喵喵小总结': '🐱 Kittyのまとめ'
+        };
+        return map[title] || title;
+    },
+    
+    /**
+     * 日语翻译解读内容（简化版，保留核心术语）
+     */
+    translateInterpContentJa(content) {
+        // 日主翻译
+        const dayMasterMap = {
+            '【甲木·参天大树】': '【甲木・大樹】',
+            '【乙木·花草藤萝】': '【乙木・花草】',
+            '【丙火·太阳之火】': '【丙火・太陽】',
+            '【丁火·灯烛之火】': '【丁火・燭火】',
+            '【戊土·高山之土】': '【戊土・高山】',
+            '【己土·田园之土】': '【己土・田園】',
+            '【庚金·宝剑之金】': '【庚金・剣】',
+            '【辛金·珠玉之金】': '【辛金・宝石】',
+            '【壬水·江河之水】': '【壬水・大河】',
+            '【癸水·雨露之水】': '【癸水・雨露】',
+            // 命格强弱
+            '【命格偏强】': '【命格が強め】',
+            '【命格中和】': '【命格が中和】',
+            '【命格偏弱】': '【命格が弱め】',
+            // 基本特质
+            '基本特质': '基本的な特質',
+            '适合方向': '向いている方向',
+            '人际关系': '人間関係',
+            '小贴士': 'ワンポイント',
+            // 开运方向
+            '开运方向': '開運の方向'
+        };
+        
+        let result = content;
+        for (const [zh, ja] of Object.entries(dayMasterMap)) {
+            result = result.replace(new RegExp(zh.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), ja);
         }
         return result;
     }

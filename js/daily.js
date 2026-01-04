@@ -401,11 +401,14 @@ const DailyFortune = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
 
         // 个性化称呼
         let greeting = '';
         if (options.name) {
-            greeting = isEn
+            greeting = isJa
+                ? `<div class="personal-greeting">🐾 ${options.name}さん、今日の運勢だよ～</div>`
+                : isEn
                 ? `<div class="personal-greeting">🐾 Dear ${options.name}, here's your daily fortune~</div>`
                 : `<div class="personal-greeting">🐾 亲爱的${options.name}，你今天的运势来咯~</div>`;
         }
@@ -414,94 +417,110 @@ const DailyFortune = {
         let accuracyNote = '';
         const filledFields = [options.hour !== null, options.gender, options.name].filter(Boolean).length;
         if (filledFields === 3) {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note">✨ 情報バッチリ！Kittyの占い超精密だよ！ニャー～</div>'
+                : isEn
                 ? '<div class="accuracy-note">✨ Great info! Kitty can be super accurate! Meow~</div>'
                 : '<div class="accuracy-note">✨ 资料很全，Kitty算得超精准哦！喵喵喵~</div>';
         } else if (filledFields === 2) {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note">🐱 まあまあね、もうちょっと情報があれば完璧なのに～</div>'
+                : isEn
                 ? '<div class="accuracy-note">🐱 Not bad, a bit more info would be better~</div>'
                 : '<div class="accuracy-note">🐱 还可以哦，资料再多一点就更准了~</div>';
         } else if (filledFields === 1) {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note">😼 情報少ないわね、大雑把にしか占えないよ～</div>'
+                : isEn
                 ? '<div class="accuracy-note">😼 Info is sparse, Kitty can only give a rough reading~</div>'
                 : '<div class="accuracy-note">😼 资料有点少哦，Kitty只能算个大概~</div>';
         } else {
-            accuracyNote = isEn
+            accuracyNote = isJa
+                ? '<div class="accuracy-note">😿 誕生日だけ…次はもっと教えてよね～</div>'
+                : isEn
                 ? '<div class="accuracy-note">😿 Only birthday... tell Kitty more next time~</div>'
                 : '<div class="accuracy-note">😿 只知道生日...下次多告诉Kitty一些呗~</div>';
         }
         
         // 翻译颜色和方位
-        const colorEn = this.translateColor(luckyInfo.color);
-        const directionEn = this.translateDirection(luckyInfo.direction);
-        const zodiacEn = this.translateZodiac(todayGanZhi.zodiac);
+        const colorTrans = this.translateColor(luckyInfo.color, isJa);
+        const directionTrans = this.translateDirection(luckyInfo.direction, isJa);
+        const zodiacTrans = this.translateZodiac(todayGanZhi.zodiac, isJa);
+
+        // 日期显示格式
+        const lunarLabel = isJa ? '旧暦' : isEn ? 'Lunar' : '农历';
+        const monthSuffix = isJa ? '月' : isEn ? ' Month ' : '月';
+        const daySuffix = isJa ? '日' : isEn ? ' Day' : '日';
+        const yearSep = isEn ? '/' : '年';
+        const monthSep = isEn ? '/' : '月';
+        const dateSuffix = isEn ? '' : '日';
 
         let html = `
             ${greeting}
             ${accuracyNote}
             <div class="daily-date">
-                <span id="daily-lunar-result">${isEn ? 'Lunar' : '农历'}${lunarDate.month}${isEn ? ' Month ' : '月'}${lunarDate.day} ${todayGanZhi.dayStem}${todayGanZhi.dayBranch}${isEn ? ' Day' : '日'}</span>
-                <span>${today.getFullYear()}${isEn ? '/' : '年'}${today.getMonth() + 1}${isEn ? '/' : '月'}${today.getDate()}${isEn ? '' : '日'}</span>
+                <span id="daily-lunar-result">${lunarLabel}${lunarDate.month}${monthSuffix}${lunarDate.day} ${todayGanZhi.dayStem}${todayGanZhi.dayBranch}${daySuffix}</span>
+                <span>${today.getFullYear()}${yearSep}${today.getMonth() + 1}${monthSep}${today.getDate()}${dateSuffix}</span>
             </div>
             
             <div class="fortune-overview">
                 <div class="fortune-item">
                     <div class="fortune-icon">📊</div>
-                    <div class="fortune-label">${isEn ? 'Overall' : '综合运势'}</div>
+                    <div class="fortune-label">${isJa ? '総合運' : isEn ? 'Overall' : '综合运势'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.overall)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💼</div>
-                    <div class="fortune-label">${isEn ? 'Career' : '事业运'}</div>
+                    <div class="fortune-label">${isJa ? '仕事運' : isEn ? 'Career' : '事业运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.career)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💰</div>
-                    <div class="fortune-label">${isEn ? 'Wealth' : '财运'}</div>
+                    <div class="fortune-label">${isJa ? '金運' : isEn ? 'Wealth' : '财运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.wealth)}</div>
                 </div>
                 <div class="fortune-item">
                     <div class="fortune-icon">💕</div>
-                    <div class="fortune-label">${isEn ? 'Love' : '感情运'}</div>
+                    <div class="fortune-label">${isJa ? '恋愛運' : isEn ? 'Love' : '感情运'}</div>
                     <div class="fortune-stars">${this.scoreToStars(fortune.love)}</div>
                 </div>
             </div>
             
             <div class="lucky-info">
                 <div class="lucky-item">
-                    <span class="lucky-label">${isEn ? 'Lucky Color:' : '幸运颜色：'}</span>
-                    <span class="lucky-value">${isEn ? colorEn : luckyInfo.color}</span>
+                    <span class="lucky-label">${isJa ? 'ラッキーカラー：' : isEn ? 'Lucky Color:' : '幸运颜色：'}</span>
+                    <span class="lucky-value">${isJa || isEn ? colorTrans : luckyInfo.color}</span>
                 </div>
                 <div class="lucky-item">
-                    <span class="lucky-label">${isEn ? 'Lucky Number:' : '幸运数字：'}</span>
+                    <span class="lucky-label">${isJa ? 'ラッキーナンバー：' : isEn ? 'Lucky Number:' : '幸运数字：'}</span>
                     <span class="lucky-value">${luckyInfo.number}</span>
                 </div>
                 <div class="lucky-item">
-                    <span class="lucky-label">${isEn ? 'Lucky Direction:' : '吉利方位：'}</span>
-                    <span class="lucky-value">${isEn ? directionEn : luckyInfo.direction}</span>
+                    <span class="lucky-label">${isJa ? '吉方位：' : isEn ? 'Lucky Direction:' : '吉利方位：'}</span>
+                    <span class="lucky-value">${isJa || isEn ? directionTrans : luckyInfo.direction}</span>
                 </div>
                 <div class="lucky-item">
-                    <span class="lucky-label">${isEn ? 'Today\'s Zodiac:' : '今日生肖：'}</span>
-                    <span class="lucky-value">${isEn ? zodiacEn + ' Year' : todayGanZhi.zodiac + '年'}</span>
+                    <span class="lucky-label">${isJa ? '今日の干支：' : isEn ? 'Today\'s Zodiac:' : '今日生肖：'}</span>
+                    <span class="lucky-value">${isJa ? zodiacTrans + '年' : isEn ? zodiacTrans + ' Year' : todayGanZhi.zodiac + '年'}</span>
                 </div>
             </div>
             
             <div class="analysis-card">
-                <h4>${isEn ? 'Daily Advice' : '今日建议'}</h4>
-                <p>${isEn ? this.translateAdvices(advices) : advices.join('<br>')}</p>
+                <h4>${isJa ? '今日のアドバイス' : isEn ? 'Daily Advice' : '今日建议'}</h4>
+                <p>${isJa ? this.translateAdvicesJa(advices) : isEn ? this.translateAdvices(advices) : advices.join('<br>')}</p>
                 <p class="disclaimer-note" style="font-size: 0.85rem; color: #888; margin-top: 12px;">
-                    ${isEn ? '⚠️ Daily fortune is for reference only, not for major decisions~' : '⚠️ 每日运势仅供参考，不作为重大决策依据～'}
+                    ${isJa ? '⚠️ 毎日の運勢は参考程度にね、重大な決断には使わないでよ～' : isEn ? '⚠️ Daily fortune is for reference only, not for major decisions~' : '⚠️ 每日运势仅供参考，不作为重大决策依据～'}
                 </p>
             </div>
             
             <div class="hide-seek-section">
                 <div class="hide-seek-question">
                     <span class="cat-emoji">😼</span>
-                    <span>${isEn ? 'Meow~ Planning something big today?' : '喵~ 今天要不要去蹲猫猫（做大事）呀？'}</span>
+                    <span>${isJa ? 'ニャ～今日大事なことする予定？' : isEn ? 'Meow~ Planning something big today?' : '喵~ 今天要不要去蹲猫猫（做大事）呀？'}</span>
                 </div>
-                <p class="hide-seek-hint">${isEn ? 'Let Kitty check if today is suitable for important matters~' : '让Kitty帮你看看今天适不适合做重要的事情~'}</p>
+                <p class="hide-seek-hint">${isJa ? '今日が大事なことに向いてるか、Kittyが見てあげる～' : isEn ? 'Let Kitty check if today is suitable for important matters~' : '让Kitty帮你看看今天适不适合做重要的事情~'}</p>
                 <button id="daily-hide-seek-btn" class="submit-btn hide-seek-btn">
-                    <span>📅 ${isEn ? 'Check if today is auspicious!' : '良辰吉日，看看今天行不行！'}</span>
+                    <span>📅 ${isJa ? '吉日かどうか、チェック！' : isEn ? 'Check if today is auspicious!' : '良辰吉日，看看今天行不行！'}</span>
                     <span class="btn-glow"></span>
                 </button>
             </div>
@@ -518,40 +537,54 @@ const DailyFortune = {
     /**
      * 翻译颜色
      */
-    translateColor(color) {
-        const map = {
+    translateColor(color, isJa = false) {
+        const mapEn = {
             '红色': 'Red', '橙色': 'Orange', '黄色': 'Yellow', '绿色': 'Green',
             '青色': 'Cyan', '蓝色': 'Blue', '紫色': 'Purple', '金色': 'Gold',
             '白色': 'White', '黑色': 'Black'
         };
-        return map[color] || color;
+        const mapJa = {
+            '红色': '赤', '橙色': 'オレンジ', '黄色': '黄', '绿色': '緑',
+            '青色': '青', '蓝色': '青', '紫色': '紫', '金色': 'ゴールド',
+            '白色': '白', '黑色': '黒'
+        };
+        return isJa ? (mapJa[color] || color) : (mapEn[color] || color);
     },
     
     /**
      * 翻译方位
      */
-    translateDirection(dir) {
-        const map = {
+    translateDirection(dir, isJa = false) {
+        const mapEn = {
             '东': 'East', '南': 'South', '西': 'West', '北': 'North',
             '东南': 'Southeast', '东北': 'Northeast', '西南': 'Southwest', '西北': 'Northwest'
         };
-        return map[dir] || dir;
+        const mapJa = {
+            '东': '東', '南': '南', '西': '西', '北': '北',
+            '东南': '東南', '东北': '東北', '西南': '西南', '西北': '西北'
+        };
+        return isJa ? (mapJa[dir] || dir) : (mapEn[dir] || dir);
     },
     
     /**
      * 翻译生肖
      */
-    translateZodiac(zodiac) {
-        const map = {
+    translateZodiac(zodiac, isJa = false) {
+        const mapEn = {
             '鼠': 'Rat', '牛': 'Ox', '虎': 'Tiger', '兔': 'Rabbit',
             '龙': 'Dragon', '蛇': 'Snake', '马': 'Horse', '羊': 'Goat',
             '猴': 'Monkey', '鸡': 'Rooster', '狗': 'Dog', '猪': 'Pig'
         };
-        return map[zodiac] || zodiac;
+        const mapJa = {
+            '鼠': '子', '牛': '丑', '虎': '寅', '兔': '卯',
+            '龙': '辰', '蛇': '巳', '马': '午', '羊': '未',
+            '猴': '申', '鸡': '酉', '狗': '戌', '猪': '亥'
+        };
+        return isJa ? (mapJa[zodiac] || zodiac) : (mapEn[zodiac] || zodiac);
     },
     
     /**
-     * 翻译每日建议
+     * 翻译每日建议（英文）
      */
     translateAdvices(advices) {
         const translations = {
@@ -563,6 +596,23 @@ const DailyFortune = {
             '财运平淡，避免大额投资。': 'Wealth luck is flat. Avoid large investments.',
             '感情运佳，利于表白、约会。': 'Love luck is good. Great for confessions and dates.',
             '注意休息，避免过度劳累。': 'Rest well. Avoid overworking.'
+        };
+        return advices.map(a => translations[a] || a).join('<br>');
+    },
+    
+    /**
+     * 翻译每日建议（日文）
+     */
+    translateAdvicesJa(advices) {
+        const translations = {
+            '今日运势大吉，宜积极进取，把握良机。': '今日は大吉！積極的に動いてチャンスを掴んで～',
+            '今日运势平稳，按部就班即可。': '今日は普通ね、いつも通りでいいわよ～',
+            '今日运势欠佳，宜守不宜攻，低调行事。': '今日はイマイチ…守りに徹して、おとなしくしてて～',
+            '事业运旺，适合谈判、签约、面试。': '仕事運バッチリ！商談・契約・面接にピッタリよ～',
+            '财运亨通，有意外收获可能。': '金運絶好調！思わぬ臨時収入あるかも～',
+            '财运平淡，避免大额投资。': '金運は平凡…大きな投資は控えてね～',
+            '感情运佳，利于表白、约会。': '恋愛運アップ！告白やデートに最適だよ～',
+            '注意休息，避免过度劳累。': 'ちゃんと休んで、無理しないでよね～'
         };
         return advices.map(a => translations[a] || a).join('<br>');
     }

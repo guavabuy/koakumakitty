@@ -381,14 +381,15 @@ const AuspiciousDay = {
         
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
+        const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
 
         // 评级对应的样式和emoji
         const ratingStyles = {
-            '大吉': { emoji: '🌟', class: 'rating-great', color: '#ff69b4', en: 'Very Auspicious' },
-            '吉': { emoji: '✨', class: 'rating-good', color: '#90EE90', en: 'Auspicious' },
-            '平': { emoji: '☯️', class: 'rating-neutral', color: '#FFD700', en: 'Neutral' },
-            '凶': { emoji: '⚠️', class: 'rating-bad', color: '#FFA500', en: 'Unfavorable' },
-            '大凶': { emoji: '💀', class: 'rating-terrible', color: '#FF6B6B', en: 'Very Unfavorable' }
+            '大吉': { emoji: '🌟', class: 'rating-great', color: '#ff69b4', en: 'Very Auspicious', ja: '大吉' },
+            '吉': { emoji: '✨', class: 'rating-good', color: '#90EE90', en: 'Auspicious', ja: '吉' },
+            '平': { emoji: '☯️', class: 'rating-neutral', color: '#FFD700', en: 'Neutral', ja: '平' },
+            '凶': { emoji: '⚠️', class: 'rating-bad', color: '#FFA500', en: 'Unfavorable', ja: '凶' },
+            '大凶': { emoji: '💀', class: 'rating-terrible', color: '#FF6B6B', en: 'Very Unfavorable', ja: '大凶' }
         };
 
         const ratingStyle = ratingStyles[targetAnalysis.rating];
@@ -398,31 +399,38 @@ const AuspiciousDay = {
             '表白': 'Confession', '结婚': 'Wedding', '打麻将': 'Mahjong',
             '搬家': 'Moving', '聚餐': 'Gathering', '出远门': 'Travel'
         };
+        const activityJa = {
+            '表白': '告白', '结婚': '結婚', '打麻将': '麻雀',
+            '搬家': '引越し', '聚餐': '会食', '出远门': '遠出'
+        };
+        
+        const activityName = isJa ? (activityJa[activity] || activity) : isEn ? (activityEn[activity] || activity) : activity;
+        const analysisTitle = isJa ? `${activityName}の吉日分析` : isEn ? `${activityName} Date Analysis` : `${activity}择日分析`;
 
         let html = `
             <div class="auspicious-result">
                 <div class="result-card">
-                    <h3>${config.icon} ${isEn ? activityEn[activity] || activity + ' Date Analysis' : activity + '择日分析'} ${config.icon}</h3>
+                    <h3>${config.icon} ${analysisTitle} ${config.icon}</h3>
                     
                     <div class="date-info">
                         <div class="target-date">
-                            <span class="date-label">📅 ${isEn ? 'Planned Date' : '计划日期'}</span>
-                            <span class="date-value">${isEn ? this.formatDateEnglish(targetAnalysis.date) : this.formatDateChinese(targetAnalysis.date)}</span>
+                            <span class="date-label">📅 ${isJa ? '予定日' : isEn ? 'Planned Date' : '计划日期'}</span>
+                            <span class="date-value">${isJa ? this.formatDateJapanese(targetAnalysis.date) : isEn ? this.formatDateEnglish(targetAnalysis.date) : this.formatDateChinese(targetAnalysis.date)}</span>
                         </div>
                         <div class="day-pillar">
-                            <span class="pillar-label">${isEn ? 'Gan Zhi' : '干支'}</span>
-                            <span class="pillar-value">${targetAnalysis.dayPillar.stem}${targetAnalysis.dayPillar.branch}${isEn ? ' Day' : '日'}</span>
+                            <span class="pillar-label">${isJa ? '干支' : isEn ? 'Gan Zhi' : '干支'}</span>
+                            <span class="pillar-value">${targetAnalysis.dayPillar.stem}${targetAnalysis.dayPillar.branch}${isJa ? '日' : isEn ? ' Day' : '日'}</span>
                         </div>
                     </div>
                     
                     <div class="rating-display ${ratingStyle.class}">
                         <span class="rating-emoji">${ratingStyle.emoji}</span>
-                        <span class="rating-text">${isEn ? ratingStyle.en : targetAnalysis.rating}</span>
-                        <span class="rating-score">${isEn ? 'Score:' : '综合评分：'}${targetAnalysis.score}${isEn ? ' pts' : '分'}</span>
+                        <span class="rating-text">${isJa ? ratingStyle.ja : isEn ? ratingStyle.en : targetAnalysis.rating}</span>
+                        <span class="rating-score">${isJa ? '総合評価：' : isEn ? 'Score:' : '综合评分：'}${targetAnalysis.score}${isJa ? '点' : isEn ? ' pts' : '分'}</span>
                     </div>
                     
                     <div class="factors-list">
-                        <h4>📊 ${isEn ? 'Detailed Analysis' : '详细分析'}</h4>
+                        <h4>📊 ${isJa ? '詳細分析' : isEn ? 'Detailed Analysis' : '详细分析'}</h4>
                         ${targetAnalysis.factors.map(f => `
                             <div class="factor-item factor-${f.type}">
                                 ${f.text}
@@ -434,36 +442,40 @@ const AuspiciousDay = {
 
         // 如果评分不高，显示推荐日期
         if (targetAnalysis.score < 65 && recommendations.length > 0) {
+            const recTitle = isJa ? 'Kittyおすすめの吉日' : isEn ? 'Kitty\'s Recommended Dates' : 'Kitty推荐的吉日';
+            const recHint = isJa ? `これから30日間で${activityName}にもっと向いてる日はこちら～` : isEn ? `Here are better days for ${activityEn[activity] || activity} in the next 30 days~` : `以下是未来30天内更适合${activity}的日子~`;
             html += `
                 <div class="result-card recommendations-card">
-                    <h3>🗓️ ${isEn ? 'Kitty\'s Recommended Dates' : 'Kitty推荐的吉日'} 🗓️</h3>
-                    <p class="rec-hint">${isEn ? `Here are better days for ${activityEn[activity] || activity} in the next 30 days~` : `以下是未来30天内更适合${activity}的日子~`}</p>
+                    <h3>🗓️ ${recTitle} 🗓️</h3>
+                    <p class="rec-hint">${recHint}</p>
                     <div class="rec-list">
                         ${recommendations.slice(0, 3).map((rec, index) => `
                             <div class="rec-item">
                                 <span class="rec-rank">${index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}</span>
-                                <span class="rec-date">${isEn ? this.formatDateEnglish(rec.date) : this.formatDateChinese(rec.date)}</span>
-                                <span class="rec-info">【${rec.jianChu}${isEn ? '' : '日'}】${rec.huangDao.isHuangDao ? (isEn ? 'Lucky' : '黄道') : ''}</span>
-                                <span class="rec-rating">${ratingStyles[rec.rating].emoji} ${isEn ? ratingStyles[rec.rating].en : rec.rating}</span>
+                                <span class="rec-date">${isJa ? this.formatDateJapanese(rec.date) : isEn ? this.formatDateEnglish(rec.date) : this.formatDateChinese(rec.date)}</span>
+                                <span class="rec-info">【${rec.jianChu}${isJa ? '日' : isEn ? '' : '日'}】${rec.huangDao.isHuangDao ? (isJa ? '黄道' : isEn ? 'Lucky' : '黄道') : ''}</span>
+                                <span class="rec-rating">${ratingStyles[rec.rating].emoji} ${isJa ? ratingStyles[rec.rating].ja : isEn ? ratingStyles[rec.rating].en : rec.rating}</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `;
         } else if (targetAnalysis.score >= 65) {
+            const congratsTitle = isJa ? `おめでとう！この日は${activityName}にピッタリよ～` : isEn ? `Great! This day is perfect for ${activityEn[activity] || activity}~` : `恭喜！这天很适合${activity}哦~`;
+            const congratsText = isJa ? 'Kittyが見たところ、あなたが選んだ日はなかなかいいわよ、安心して進めて～' : isEn ? 'Kitty thinks the day you chose is quite nice. Go ahead with confidence~' : `本喵觉得你选的这个日子挺不错的，可以放心去${config.description}啦~`;
             html += `
                 <div class="result-card congrats-card">
-                    <h3>🎉 ${isEn ? `Great! This day is perfect for ${activityEn[activity] || activity}~` : `恭喜！这天很适合${activity}哦~`} 🎉</h3>
-                    <p>${isEn ? 'Kitty thinks the day you chose is quite nice. Go ahead with confidence~' : `本喵觉得你选的这个日子挺不错的，可以放心去${config.description}啦~`}</p>
+                    <h3>🎉 ${congratsTitle} 🎉</h3>
+                    <p>${congratsText}</p>
                 </div>
             `;
         }
 
         // 喵喵小贴士
-        const tips = this.getCatTips(activity, targetAnalysis, isEn);
+        const tips = this.getCatTips(activity, targetAnalysis, isEn, isJa);
         html += `
             <div class="result-card cat-tips-card">
-                <h3>🐱 ${isEn ? 'Kitty\'s Tips' : '喵喵小贴士'}</h3>
+                <h3>🐱 ${isJa ? 'Kittyのワンポイント' : isEn ? 'Kitty\'s Tips' : '喵喵小贴士'}</h3>
                 <p>${tips}</p>
             </div>
         `;
@@ -486,11 +498,23 @@ const AuspiciousDay = {
         const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
     },
+    
+    /**
+     * 格式化日期（日本語）
+     */
+    formatDateJapanese(date) {
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+        const weekDay = weekDays[date.getDay()];
+        return `${year}年${month}月${day}日（${weekDay}曜日）`;
+    },
 
     /**
      * 生成猫咪语气的小贴士
      */
-    getCatTips(activity, analysis, isEn = false) {
+    getCatTips(activity, analysis, isEn = false, isJa = false) {
         const catFaces = ['(=^･ω･^=)', '(=´∇｀=)', '(^・ω・^)', 'ฅ^•ﻌ•^ฅ'];
         const randomFace = catFaces[Math.floor(Math.random() * catFaces.length)];
 
@@ -559,9 +583,43 @@ const AuspiciousDay = {
                 `${randomFace} Have a great trip! Bring Kitty some souvenirs~`
             ]
         };
+        
+        const tipsJa = {
+            '表白': [
+                `${randomFace} 告白は誠実にね～Kittyは本当の気持ちが一番大事だと思うわ、日取りは錦上添花よ～`,
+                `${randomFace} どんな日でも、勇気を持って愛を伝えるのが一番可愛いわ！頑張って～`,
+                `${randomFace} Kittyのシークレット：夕方の告白は成功率高いのよ～`
+            ],
+            '结婚': [
+                `${randomFace} 結婚は人生の一大事、日取りより二人の愛情が一番大事よ～`,
+                `${randomFace} 末永くお幸せに…子猫ちゃんもたくさん生まれますように～`,
+                `${randomFace} Kittyは愛し合っていれば毎日が吉日だと思うわ～`
+            ],
+            '打麻将': [
+                `${randomFace} 麻雀はほどほどにね～Kittyからのお願い、小さな賭けは楽しいけど大きいのはダメよ～`,
+                `${randomFace} 勝ち負けは二の次、楽しむのが一番よ～`,
+                `${randomFace} Kittyの秘訣：南向きに座ると金運アップ～（でも八字を確認してね）`
+            ],
+            '搬家': [
+                `${randomFace} 引越しの時は水とお米を先に運ぶと、豊かな生活の象徴よ～`,
+                `${randomFace} 新居では窓を開けて、良い運気を入れてね～`,
+                `${randomFace} Kittyのおすすめ：引越し当日は美味しいご飯を作って、家も心も温めて～`
+            ],
+            '聚餐': [
+                `${randomFace} 会食は楽しむのが一番！たくさん写真撮ってね～`,
+                `${randomFace} Kittyは思うの、いい友達と一緒なら何を食べても美味しいわ～`,
+                `${randomFace} Kittyにお魚スナック持って帰ってきてね～`
+            ],
+            '出远门': [
+                `${randomFace} 旅行中は安全にね～Kittyは寂しくなるわ～`,
+                `${randomFace} パスポートとお財布と、楽しい心を忘れずにね～`,
+                `${randomFace} 良い旅を！Kittyにお土産忘れないでね～`
+            ]
+        };
 
-        const tips = isEn ? tipsEn : tipsZh;
-        const activityTips = tips[activity] || [`${randomFace} ${isEn ? 'Wishing you all the best~' : '祝你一切顺利喵~'}`];
+        const tips = isJa ? tipsJa : isEn ? tipsEn : tipsZh;
+        const defaultTip = isJa ? '全てがうまくいきますように～' : isEn ? 'Wishing you all the best~' : '祝你一切顺利喵~';
+        const activityTips = tips[activity] || [`${randomFace} ${defaultTip}`];
         return activityTips[Math.floor(Math.random() * activityTips.length)];
     }
 };
