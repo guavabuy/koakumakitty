@@ -24,18 +24,22 @@ import ChineseCalendar, {
 
 import { DaYunCalculator } from './dayun.js';
 
+// 导入统一常量
+import { MONTH_ELEMENT_STRENGTH, WUXING } from './constants.js';
+
 // ===== 天干地支关系常量 =====
 
 /**
- * [NiShi-TJ-05] 天干五合
+ * [NiShi-TJ-05] 天干五合及合化条件
  * 甲己合化土，乙庚合化金，丙辛合化水，丁壬合化木，戊癸合化火
+ * 合化条件：需要月令五行支持，否则只是"合而不化"
  */
 export const STEM_COMBINATIONS = {
-    '甲己': { result: '土', type: '合' },
-    '乙庚': { result: '金', type: '合' },
-    '丙辛': { result: '水', type: '合' },
-    '丁壬': { result: '木', type: '合' },
-    '戊癸': { result: '火', type: '合' }
+    '甲己': { result: '土', type: '合', materializeMonths: ['辰', '戌', '丑', '未'] },
+    '乙庚': { result: '金', type: '合', materializeMonths: ['申', '酉'] },
+    '丙辛': { result: '水', type: '合', materializeMonths: ['亥', '子'] },
+    '丁壬': { result: '木', type: '合', materializeMonths: ['寅', '卯'] },
+    '戊癸': { result: '火', type: '合', materializeMonths: ['巳', '午'] }
 };
 
 /**
@@ -129,35 +133,49 @@ export class LiuNianCalculator {
      * 分析天干关系
      * @param {string} stem1 - 天干1
      * @param {string} stem2 - 天干2
+     * @param {string} monthBranch - 月支（用于判断合化条件）
      * @returns {Object|null} 关系信息
      */
-    static analyzeStemRelation(stem1, stem2) {
+    static analyzeStemRelation(stem1, stem2, monthBranch = null) {
         const key1 = stem1 + stem2;
         const key2 = stem2 + stem1;
-        
+
         // 检查五合
-        if (STEM_COMBINATIONS[key1]) {
-            return { ...STEM_COMBINATIONS[key1], stems: key1, ruleRef: 'NiShi-TJ-05' };
+        const combo = STEM_COMBINATIONS[key1] || STEM_COMBINATIONS[key2];
+        if (combo) {
+            const actualKey = STEM_COMBINATIONS[key1] ? key1 : key2;
+            // 检查是否合化成功
+            let materialized = false;
+            if (monthBranch && combo.materializeMonths) {
+                materialized = combo.materializeMonths.includes(monthBranch);
+            }
+            return {
+                ...combo,
+                stems: actualKey,
+                materialized,
+                type: materialized ? '合化' : '合',
+                desc: materialized
+                    ? `${actualKey}合化${combo.result}`
+                    : `${actualKey}相合（未化）`,
+                ruleRef: 'NiShi-TJ-05'
+            };
         }
-        if (STEM_COMBINATIONS[key2]) {
-            return { ...STEM_COMBINATIONS[key2], stems: key2, ruleRef: 'NiShi-TJ-05' };
-        }
-        
+
         // 检查相冲
         if (STEM_CLASHES.includes(key1) || STEM_CLASHES.includes(key2)) {
             return { type: '冲', stems: key1, desc: `${stem1}${stem2}相冲`, ruleRef: 'NiShi-TJ-05' };
         }
-        
+
         // 五行生克关系
         const e1 = STEM_ELEMENTS[stem1];
         const e2 = STEM_ELEMENTS[stem2];
         const relation = ChineseCalendar.WuXing.getRelation(e1, e2);
-        
+
         return { type: relation, stems: key1, element1: e1, element2: e2 };
     }
     
     /**
-     * [NiShi-TJ-06] 分析地支关系
+     * [NiShi-TJ-06] 分析地支关系（两支之间）
      * @param {string} branch1 - 地支1
      * @param {string} branch2 - 地支2
      * @returns {Object|null} 关系信息
@@ -165,7 +183,7 @@ export class LiuNianCalculator {
     static analyzeBranchRelation(branch1, branch2) {
         const key1 = branch1 + branch2;
         const key2 = branch2 + branch1;
-        
+
         // 检查六合
         if (BRANCH_SIX_COMBINATIONS[key1]) {
             return { ...BRANCH_SIX_COMBINATIONS[key1], branches: key1, ruleRef: 'NiShi-TJ-06' };
@@ -173,7 +191,7 @@ export class LiuNianCalculator {
         if (BRANCH_SIX_COMBINATIONS[key2]) {
             return { ...BRANCH_SIX_COMBINATIONS[key2], branches: key2, ruleRef: 'NiShi-TJ-06' };
         }
-        
+
         // 检查六冲
         if (BRANCH_CLASHES[key1]) {
             return { ...BRANCH_CLASHES[key1], branches: key1, ruleRef: 'NiShi-TJ-06' };
@@ -181,7 +199,7 @@ export class LiuNianCalculator {
         if (BRANCH_CLASHES[key2]) {
             return { ...BRANCH_CLASHES[key2], branches: key2, ruleRef: 'NiShi-TJ-06' };
         }
-        
+
         // 检查六害
         if (BRANCH_HARMS[key1]) {
             return { ...BRANCH_HARMS[key1], branches: key1, ruleRef: 'NiShi-TJ-06' };
@@ -189,7 +207,7 @@ export class LiuNianCalculator {
         if (BRANCH_HARMS[key2]) {
             return { ...BRANCH_HARMS[key2], branches: key2, ruleRef: 'NiShi-TJ-06' };
         }
-        
+
         // 自刑检查
         if (branch1 === branch2) {
             const selfPunishment = BRANCH_THREE_PUNISHMENTS[branch1 + branch1];
@@ -197,12 +215,136 @@ export class LiuNianCalculator {
                 return { ...selfPunishment, branches: key1, ruleRef: 'NiShi-TJ-06' };
             }
         }
-        
+
         return null;
+    }
+
+    /**
+     * [NiShi-TJ-06] 检测三合局（需要三支同时出现）
+     * @param {Array<string>} allBranches - 所有地支数组（命局+大运+流年）
+     * @returns {Array<Object>} 检测到的三合局列表
+     */
+    static detectThreeCombinations(allBranches) {
+        const results = [];
+        const branchSet = new Set(allBranches);
+
+        for (const [key, combo] of Object.entries(BRANCH_THREE_COMBINATIONS)) {
+            const required = key.split(''); // ['申', '子', '辰']
+            const present = required.filter(b => branchSet.has(b));
+
+            if (present.length === 3) {
+                // 三支齐全，三合成局
+                results.push({
+                    ...combo,
+                    branches: key,
+                    complete: true,
+                    desc: `${key}三合${combo.result}局成立`,
+                    ruleRef: 'NiShi-TJ-06'
+                });
+            } else if (present.length === 2) {
+                // 两支在，待合
+                results.push({
+                    ...combo,
+                    branches: present.join(''),
+                    complete: false,
+                    desc: `${present.join('')}待合${combo.result}局（缺${required.find(b => !branchSet.has(b))}）`,
+                    ruleRef: 'NiShi-TJ-06'
+                });
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * [NiShi-TJ-06] 检测三刑（需要三支或特定两支同时出现）
+     * @param {Array<string>} allBranches - 所有地支数组
+     * @returns {Array<Object>} 检测到的三刑列表
+     */
+    static detectThreePunishments(allBranches) {
+        const results = [];
+        const branchCount = {};
+        allBranches.forEach(b => {
+            branchCount[b] = (branchCount[b] || 0) + 1;
+        });
+
+        // 1. 寅巳申 无恩之刑（需三支齐）
+        if (branchCount['寅'] && branchCount['巳'] && branchCount['申']) {
+            results.push({
+                type: '无恩之刑',
+                branches: '寅巳申',
+                desc: '寅巳申三刑齐聚，主意外伤灾',
+                severity: 'high',
+                ruleRef: 'NiShi-TJ-06'
+            });
+        }
+
+        // 2. 丑戌未 恃势之刑（需三支齐）
+        if (branchCount['丑'] && branchCount['戌'] && branchCount['未']) {
+            results.push({
+                type: '恃势之刑',
+                branches: '丑戌未',
+                desc: '丑戌未三刑齐聚，主是非官讼',
+                severity: 'high',
+                ruleRef: 'NiShi-TJ-06'
+            });
+        }
+
+        // 3. 子卯相刑（无礼之刑，两支即成）
+        if (branchCount['子'] && branchCount['卯']) {
+            results.push({
+                type: '无礼之刑',
+                branches: '子卯',
+                desc: '子卯相刑，主名誉受损',
+                severity: 'medium',
+                ruleRef: 'NiShi-TJ-06'
+            });
+        }
+
+        // 4. 自刑（辰辰、午午、酉酉、亥亥）
+        ['辰', '午', '酉', '亥'].forEach(branch => {
+            if (branchCount[branch] >= 2) {
+                results.push({
+                    type: '自刑',
+                    branches: branch + branch,
+                    desc: `${branch}${branch}自刑，主自寻烦恼`,
+                    severity: 'low',
+                    ruleRef: 'NiShi-TJ-06'
+                });
+            }
+        });
+
+        return results;
+    }
+
+    /**
+     * 获取月令对流年五行的影响
+     * @param {string} monthBranch - 月支
+     * @param {string} element - 五行
+     * @returns {Object} { status, modifier }
+     */
+    static getMonthInfluence(monthBranch, element) {
+        const strength = MONTH_ELEMENT_STRENGTH[monthBranch];
+        if (!strength) return { status: '休', modifier: 0 };
+
+        const status = strength[element];
+        const modifiers = {
+            '旺': 8,   // 当令得势
+            '相': 5,   // 次旺
+            '休': 0,   // 休息
+            '囚': -5,  // 被困
+            '死': -8   // 最弱
+        };
+
+        return {
+            status,
+            modifier: modifiers[status] || 0,
+            desc: `${element}在${monthBranch}月为「${status}」`
+        };
     }
     
     /**
-     * [NiShi-TJ-07] 流年与大运叠加分析
+     * [NiShi-TJ-07] 流年与大运叠加分析（优化版）
      * @param {Object} liuNian - 流年信息
      * @param {Object} daYun - 当前大运信息
      * @param {Object} pillars - 原局四柱
@@ -211,19 +353,39 @@ export class LiuNianCalculator {
     static analyzeOverlay(liuNian, daYun, pillars) {
         const factors = [];
         let score = 60; // 基础分
-        
+
         const dayMaster = pillars.day.stem;
         const dayElement = STEM_ELEMENTS[dayMaster];
-        
-        // 1. 流年天干与日主关系
-        const liuNianStemRelation = this.analyzeStemRelation(liuNian.stem, dayMaster);
+        const monthBranch = pillars.month.branch;
+
+        // 收集所有地支（用于三合局、三刑检测）
+        const allBranches = [
+            pillars.year.branch,
+            pillars.month.branch,
+            pillars.day.branch,
+            pillars.hour.branch,
+            liuNian.branch
+        ];
+        if (daYun) allBranches.push(daYun.branch);
+
+        // === 1. 流年天干与日主关系（传入月支检测合化）===
+        const liuNianStemRelation = this.analyzeStemRelation(liuNian.stem, dayMaster, monthBranch);
         if (liuNianStemRelation) {
-            if (liuNianStemRelation.type === '合') {
-                score += 10;
+            if (liuNianStemRelation.type === '合化') {
+                score += 12;
                 factors.push({
                     source: '流年干与日主',
-                    relation: `${liuNian.stem}${dayMaster}相合`,
-                    effect: '+10',
+                    relation: liuNianStemRelation.desc,
+                    effect: '+12',
+                    desc: '流年与日主合化成功，运势大顺',
+                    ruleRef: 'NiShi-TJ-07'
+                });
+            } else if (liuNianStemRelation.type === '合') {
+                score += 8;
+                factors.push({
+                    source: '流年干与日主',
+                    relation: liuNianStemRelation.desc,
+                    effect: '+8',
                     desc: '流年天干与日主相合，有贵人助力',
                     ruleRef: 'NiShi-TJ-07'
                 });
@@ -256,8 +418,8 @@ export class LiuNianCalculator {
                 });
             }
         }
-        
-        // 2. 流年地支与年支关系（太岁）
+
+        // === 2. 流年地支与年支关系（太岁）- 调整权重 ===
         const liuNianBranchRelation = this.analyzeBranchRelation(liuNian.branch, pillars.year.branch);
         if (liuNianBranchRelation) {
             if (liuNianBranchRelation.type === '六合') {
@@ -270,11 +432,12 @@ export class LiuNianCalculator {
                     ruleRef: 'NiShi-TJ-07'
                 });
             } else if (liuNianBranchRelation.type === '六冲') {
-                score -= 15;
+                // 调整：-15 → -12
+                score -= 12;
                 factors.push({
                     source: '流年支与年支',
                     relation: liuNianBranchRelation.branches + '六冲',
-                    effect: '-15',
+                    effect: '-12',
                     desc: '冲太岁，变动较大，需化解',
                     ruleRef: 'NiShi-TJ-07'
                 });
@@ -289,8 +452,8 @@ export class LiuNianCalculator {
                 });
             }
         }
-        
-        // 3. 本命年检查
+
+        // === 3. 本命年检查 ===
         if (liuNian.branch === pillars.year.branch) {
             score -= 5;
             factors.push({
@@ -301,48 +464,125 @@ export class LiuNianCalculator {
                 ruleRef: 'NiShi-TJ-07'
             });
         }
-        
-        // 4. 大运与流年叠加（如果有大运信息）
+
+        // === 4. 大运与流年叠加（调整权重）===
         if (daYun) {
             // 大运与流年天干关系
-            const daYunLiuNianStem = this.analyzeStemRelation(daYun.stem, liuNian.stem);
-            if (daYunLiuNianStem && daYunLiuNianStem.type === '合') {
-                score += 5;
+            const daYunLiuNianStem = this.analyzeStemRelation(daYun.stem, liuNian.stem, monthBranch);
+            if (daYunLiuNianStem && (daYunLiuNianStem.type === '合' || daYunLiuNianStem.type === '合化')) {
+                score += 6;
                 factors.push({
                     source: '大运干与流年干',
-                    relation: `${daYun.stem}${liuNian.stem}相合`,
-                    effect: '+5',
+                    relation: daYunLiuNianStem.desc || `${daYun.stem}${liuNian.stem}相合`,
+                    effect: '+6',
                     desc: '大运流年天干相合，运势平顺',
                     ruleRef: 'NiShi-TJ-07'
                 });
             } else if (daYunLiuNianStem && daYunLiuNianStem.type === '冲') {
-                score -= 5;
+                score -= 6;
                 factors.push({
                     source: '大运干与流年干',
                     relation: `${daYun.stem}${liuNian.stem}相冲`,
-                    effect: '-5',
+                    effect: '-6',
                     desc: '大运流年天干相冲，易有变动',
                     ruleRef: 'NiShi-TJ-07'
                 });
             }
-            
+
             // 大运与流年地支关系
             const daYunLiuNianBranch = this.analyzeBranchRelation(daYun.branch, liuNian.branch);
-            if (daYunLiuNianBranch && daYunLiuNianBranch.type === '六冲') {
-                score -= 8;
-                factors.push({
-                    source: '大运支与流年支',
-                    relation: daYunLiuNianBranch.branches + '六冲',
-                    effect: '-8',
-                    desc: '大运流年地支相冲，交运年需注意',
-                    ruleRef: 'NiShi-TJ-07'
-                });
+            if (daYunLiuNianBranch) {
+                if (daYunLiuNianBranch.type === '六合') {
+                    // 新增：大运支合流年支
+                    score += 6;
+                    factors.push({
+                        source: '大运支与流年支',
+                        relation: daYunLiuNianBranch.branches + '六合',
+                        effect: '+6',
+                        desc: '大运流年地支相合，运势顺遂',
+                        ruleRef: 'NiShi-TJ-07'
+                    });
+                } else if (daYunLiuNianBranch.type === '六冲') {
+                    // 调整：-5 → -8
+                    score -= 8;
+                    factors.push({
+                        source: '大运支与流年支',
+                        relation: daYunLiuNianBranch.branches + '六冲',
+                        effect: '-8',
+                        desc: '大运流年地支相冲，交运年需注意',
+                        ruleRef: 'NiShi-TJ-07'
+                    });
+                }
             }
         }
-        
+
+        // === 5. 三合局检测 ===
+        const threeCombos = this.detectThreeCombinations(allBranches);
+        for (const combo of threeCombos) {
+            if (combo.complete) {
+                // 三合成局，根据合出的五行与日主关系判断吉凶
+                const comboElement = combo.result;
+                if (comboElement === dayElement || WUXING.generatedBy[dayElement] === comboElement) {
+                    score += 10;
+                    factors.push({
+                        source: '三合局',
+                        relation: combo.desc,
+                        effect: '+10',
+                        desc: `${combo.branches}三合${comboElement}局，生扶日主`,
+                        ruleRef: 'NiShi-TJ-06'
+                    });
+                } else if (WUXING.controlledBy[dayElement] === comboElement) {
+                    score -= 6;
+                    factors.push({
+                        source: '三合局',
+                        relation: combo.desc,
+                        effect: '-6',
+                        desc: `${combo.branches}三合${comboElement}局，克制日主`,
+                        ruleRef: 'NiShi-TJ-06'
+                    });
+                } else {
+                    score += 4;
+                    factors.push({
+                        source: '三合局',
+                        relation: combo.desc,
+                        effect: '+4',
+                        desc: `${combo.branches}三合${comboElement}局成立`,
+                        ruleRef: 'NiShi-TJ-06'
+                    });
+                }
+            }
+        }
+
+        // === 6. 三刑检测 ===
+        const punishments = this.detectThreePunishments(allBranches);
+        for (const punishment of punishments) {
+            const penaltyScore = punishment.severity === 'high' ? -12 : punishment.severity === 'medium' ? -8 : -4;
+            score += penaltyScore;
+            factors.push({
+                source: '三刑',
+                relation: punishment.type,
+                effect: `${penaltyScore}`,
+                desc: punishment.desc,
+                ruleRef: 'NiShi-TJ-06'
+            });
+        }
+
+        // === 7. 月令对流年五行的影响 ===
+        const monthInfluence = this.getMonthInfluence(monthBranch, liuNian.stemElement);
+        if (monthInfluence.modifier !== 0) {
+            score += monthInfluence.modifier;
+            factors.push({
+                source: '月令影响',
+                relation: monthInfluence.desc,
+                effect: monthInfluence.modifier > 0 ? `+${monthInfluence.modifier}` : `${monthInfluence.modifier}`,
+                desc: `流年${liuNian.stemElement}${monthInfluence.status === '旺' || monthInfluence.status === '相' ? '得月令之气' : '失月令之气'}`,
+                ruleRef: 'NiShi-TJ-07'
+            });
+        }
+
         // 确保分数在合理范围
         score = Math.max(20, Math.min(100, score));
-        
+
         // 生成运势等级
         let level, levelDesc;
         if (score >= 80) {
@@ -361,7 +601,7 @@ export class LiuNianCalculator {
             level = '凶';
             levelDesc = '变动频繁，化解为先';
         }
-        
+
         return {
             score,
             level,
@@ -369,6 +609,8 @@ export class LiuNianCalculator {
             factors,
             liuNian,
             daYun,
+            threeCombinations: threeCombos.filter(c => c.complete),
+            punishments,
             ruleRef: 'NiShi-TJ-07',
             explanation: factors.map(f => f.desc).join('；')
         };

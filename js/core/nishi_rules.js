@@ -16,8 +16,16 @@ import ChineseCalendar, {
     HEAVENLY_STEMS,
     EARTHLY_BRANCHES,
     STEM_ELEMENTS,
-    STEM_YIN_YANG
+    STEM_YIN_YANG,
+    BRANCH_ELEMENTS
 } from './calendar.js';
+
+// 导入统一常量
+import {
+    MONTH_ELEMENT_STRENGTH,
+    BRANCH_HIDDEN_STEMS,
+    WUXING
+} from './constants.js';
 
 /**
  * 标准返回结果接口定义
@@ -181,6 +189,193 @@ export class NiShiRules {
          */
         getDayPillar(date) {
             return ChineseCalendar.getDayPillar(date);
+        },
+
+        /**
+         * [NiShi-TJ-08] 身强身弱判断
+         * 基于倪师《天纪》：日主在月令的旺衰 + 四柱生扶/克泄统计
+         *
+         * @param {Object} pillars - 四柱 { year, month, day, hour }
+         * @returns {Object} { strength: 'strong'|'weak'|'balanced', score, details }
+         */
+        assessDayMasterStrength(pillars) {
+            const dayMaster = pillars.day.stem;
+            const dayElement = STEM_ELEMENTS[dayMaster];
+            const monthBranch = pillars.month.branch;
+
+            let score = 0; // 正数=身强，负数=身弱
+            const details = [];
+
+            // === 1. 月令旺衰（权重最大，占40%）===
+            const monthStrength = MONTH_ELEMENT_STRENGTH[monthBranch];
+            if (monthStrength) {
+                const status = monthStrength[dayElement];
+                const monthScores = {
+                    '旺': 40,   // 当令
+                    '相': 25,   // 次旺
+                    '休': 0,    // 休息
+                    '囚': -20,  // 被困
+                    '死': -35   // 最弱
+                };
+                const monthScore = monthScores[status] || 0;
+                score += monthScore;
+                details.push({
+                    source: '月令',
+                    desc: `日主${dayElement}在${monthBranch}月为「${status}」`,
+                    effect: monthScore > 0 ? `+${monthScore}` : `${monthScore}`,
+                    ruleRef: 'NiShi-TJ-08'
+                });
+            }
+
+            // === 2. 四柱天干生扶/克泄（权重30%）===
+            const stems = [
+                { pos: '年干', stem: pillars.year.stem },
+                { pos: '月干', stem: pillars.month.stem },
+                { pos: '时干', stem: pillars.hour.stem }
+            ];
+
+            for (const { pos, stem } of stems) {
+                const stemElement = STEM_ELEMENTS[stem];
+                let effect = 0;
+                let desc = '';
+
+                if (stemElement === dayElement) {
+                    // 同类（比劫）
+                    effect = 8;
+                    desc = `${pos}${stem}(${stemElement})与日主同类`;
+                } else if (WUXING.generatedBy[dayElement] === stemElement) {
+                    // 生我（印）
+                    effect = 10;
+                    desc = `${pos}${stem}(${stemElement})生日主`;
+                } else if (WUXING.generate[dayElement] === stemElement) {
+                    // 我生（食伤）- 泄气
+                    effect = -6;
+                    desc = `${pos}${stem}(${stemElement})泄日主`;
+                } else if (WUXING.controlledBy[dayElement] === stemElement) {
+                    // 克我（官杀）
+                    effect = -8;
+                    desc = `${pos}${stem}(${stemElement})克日主`;
+                } else if (WUXING.control[dayElement] === stemElement) {
+                    // 我克（财）- 耗气
+                    effect = -4;
+                    desc = `${pos}${stem}(${stemElement})耗日主`;
+                }
+
+                if (effect !== 0) {
+                    score += effect;
+                    details.push({
+                        source: pos,
+                        desc,
+                        effect: effect > 0 ? `+${effect}` : `${effect}`,
+                        ruleRef: 'NiShi-TJ-08'
+                    });
+                }
+            }
+
+            // === 3. 四柱地支藏干（权重30%）===
+            const branches = [
+                { pos: '年支', branch: pillars.year.branch },
+                { pos: '月支', branch: pillars.month.branch },
+                { pos: '日支', branch: pillars.day.branch },
+                { pos: '时支', branch: pillars.hour.branch }
+            ];
+
+            for (const { pos, branch } of branches) {
+                const hiddenStems = BRANCH_HIDDEN_STEMS[branch] || [];
+                // 本气（第一个藏干）权重高
+                hiddenStems.forEach((stem, idx) => {
+                    const stemElement = STEM_ELEMENTS[stem];
+                    const weight = idx === 0 ? 1.0 : 0.5; // 本气1倍，余气0.5倍
+                    let baseEffect = 0;
+
+                    if (stemElement === dayElement) {
+                        baseEffect = 5;
+                    } else if (WUXING.generatedBy[dayElement] === stemElement) {
+                        baseEffect = 6;
+                    } else if (WUXING.generate[dayElement] === stemElement) {
+                        baseEffect = -4;
+                    } else if (WUXING.controlledBy[dayElement] === stemElement) {
+                        baseEffect = -5;
+                    } else if (WUXING.control[dayElement] === stemElement) {
+                        baseEffect = -3;
+                    }
+
+                    if (baseEffect !== 0) {
+                        const effect = Math.round(baseEffect * weight);
+                        score += effect;
+                    }
+                });
+            }
+
+            // === 判定结果 ===
+            let strength, strengthDesc;
+            if (score >= 20) {
+                strength = 'strong';
+                strengthDesc = '身强';
+            } else if (score <= -20) {
+                strength = 'weak';
+                strengthDesc = '身弱';
+            } else {
+                strength = 'balanced';
+                strengthDesc = '中和';
+            }
+
+            return {
+                strength,
+                strengthDesc,
+                score,
+                dayMaster,
+                dayElement,
+                monthBranch,
+                details,
+                // 喜用神提示
+                favorableElements: this.getFavorableElements(dayElement, strength),
+                ruleRef: 'NiShi-TJ-08'
+            };
+        },
+
+        /**
+         * 根据身强身弱获取喜用神
+         * @param {string} dayElement - 日主五行
+         * @param {string} strength - 身强/身弱/中和
+         * @returns {Object} { favorable, unfavorable }
+         */
+        getFavorableElements(dayElement, strength) {
+            // 身强喜克泄耗（官杀、食伤、财）
+            // 身弱喜生扶（印、比劫）
+            if (strength === 'strong') {
+                return {
+                    favorable: [
+                        WUXING.control[dayElement],      // 我克（财）
+                        WUXING.generate[dayElement],     // 我生（食伤）
+                        WUXING.controlledBy[dayElement]  // 克我（官杀）
+                    ],
+                    unfavorable: [
+                        dayElement,                       // 同类
+                        WUXING.generatedBy[dayElement]   // 生我（印）
+                    ],
+                    advice: '身强宜泄不宜补，财官食伤为喜用'
+                };
+            } else if (strength === 'weak') {
+                return {
+                    favorable: [
+                        dayElement,                       // 同类（比劫）
+                        WUXING.generatedBy[dayElement]   // 生我（印）
+                    ],
+                    unfavorable: [
+                        WUXING.control[dayElement],      // 我克（财）
+                        WUXING.generate[dayElement],     // 我生（食伤）
+                        WUXING.controlledBy[dayElement]  // 克我（官杀）
+                    ],
+                    advice: '身弱宜扶不宜泄，印比为喜用'
+                };
+            } else {
+                return {
+                    favorable: [dayElement],
+                    unfavorable: [],
+                    advice: '身旺身弱中和，取用神需看格局'
+                };
+            }
         }
     };
 

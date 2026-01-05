@@ -1,6 +1,8 @@
 /**
  * 天机道 - 主控制器
  * 处理页面交互和模块调用
+ *
+ * 重构说明：使用工厂模式简化模块初始化
  */
 
 // ============ Hash 路由配置 ============
@@ -19,17 +21,97 @@ const TAB_CONFIG = {
     }
 };
 
+// ============ 模块初始化工厂 ============
+
+/**
+ * 通用模块初始化工厂
+ * @param {Object} config - 模块配置
+ * @param {string} config.name - 模块名称（用于 Tracker）
+ * @param {string} config.submitId - 提交按钮 ID
+ * @param {string} config.resultId - 结果容器 ID
+ * @param {Function} config.validate - 验证函数，返回 { valid, data } 或 { valid: false, message }
+ * @param {Function} config.calculate - 计算函数，接收 validated data
+ * @param {Function} config.render - 渲染函数，接收计算结果
+ * @param {string} config.loadingText - 加载时按钮文本
+ * @param {string} config.defaultText - 默认按钮文本
+ * @param {number} config.delay - 延迟时间（毫秒）
+ * @param {Function} [config.onSuccess] - 成功后回调
+ */
+function createModuleInitializer(config) {
+    return function() {
+        const submitBtn = document.getElementById(config.submitId);
+        const resultDiv = document.getElementById(config.resultId);
+
+        if (!submitBtn || !resultDiv) {
+            console.error(`Module ${config.name}: elements not found`);
+            return;
+        }
+
+        submitBtn.addEventListener('click', () => {
+            // 验证
+            const validation = config.validate();
+            if (!validation.valid) {
+                alert(validation.message);
+                return;
+            }
+
+            // 显示加载状态
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>${config.loadingText}</span>`;
+
+            setTimeout(() => {
+                try {
+                    // 计算
+                    const result = config.calculate(validation.data);
+
+                    // 渲染
+                    resultDiv.innerHTML = config.render(result, validation.data);
+                    resultDiv.classList.remove('hidden');
+
+                    // 记录使用
+                    if (typeof Tracker !== 'undefined') {
+                        Tracker.logFeatureUsage(config.name, validation.data);
+                    }
+
+                    // 滚动到结果
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // 成功回调
+                    if (config.onSuccess) {
+                        config.onSuccess(result, validation.data);
+                    }
+                } catch (error) {
+                    console.error(`${config.name} 计算错误:`, error);
+                    resultDiv.innerHTML = '<div class="analysis-card"><p>计算出错，请重试</p></div>';
+                    resultDiv.classList.remove('hidden');
+                }
+
+                // 恢复按钮
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span>${config.defaultText}</span><span class="btn-glow"></span>`;
+            }, config.delay || 500);
+        });
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    // 初始化路由和模块
+    // 初始化路由
     initTabs();
-    initBaZi();
-    initName();
-    initYiJing();
-    initDaily();
+
+    // 使用工厂模式初始化模块
+    initBaZiModule();
+    initNameModule();
+    initYiJingModule();
+    initDailyModule();
+    initYearly2026Module();
+    initMarriageModule();
+    initAuspiciousModule();
+
+    // 复杂模块保持独立实现
     initFengShui();
-    initMarriage();
     initFaceReading();
-    initAuspicious();
+
+    // 更新每日日期显示
     updateDailyDate();
 });
 
@@ -132,215 +214,167 @@ function initTabs() {
 }
 
 /**
- * 八字模块初始化
+ * 八字模块初始化（工厂模式）
  */
-function initBaZi() {
-    const submitBtn = document.getElementById('bazi-submit');
+function initBaZiModule() {
+    // 设置默认日期
     const dateInput = document.getElementById('bazi-date');
-    const hourSelect = document.getElementById('bazi-hour');
-    const resultDiv = document.getElementById('bazi-result');
+    if (dateInput) {
+        const defaultDate = new Date();
+        defaultDate.setFullYear(defaultDate.getFullYear() - 30);
+        dateInput.valueAsDate = defaultDate;
+    }
 
-    // 设置默认日期为30年前
-    const defaultDate = new Date();
-    defaultDate.setFullYear(defaultDate.getFullYear() - 30);
-    dateInput.valueAsDate = defaultDate;
-
-    submitBtn.addEventListener('click', () => {
-        const birthDate = dateInput.value;
-        const hourIndex = parseInt(hourSelect.value);
-        const gender = document.querySelector('input[name="gender"]:checked').value;
-
-        if (!birthDate) {
-            alert('请选择出生日期');
-            return;
-        }
-
-        // 显示加载动画
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>推算中...</span>';
-
-        setTimeout(() => {
-            try {
-                const result = BaZi.calculate(birthDate, hourIndex, gender);
-                resultDiv.innerHTML = BaZi.renderResult(result);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('bazi', { birthdate: birthDate, hour: hourIndex, gender });
-
-                // 滚动到结果
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (error) {
-                console.error('八字计算错误:', error);
-                resultDiv.innerHTML = '<div class="analysis-card"><p>计算出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
+    const init = createModuleInitializer({
+        name: 'bazi',
+        submitId: 'bazi-submit',
+        resultId: 'bazi-result',
+        loadingText: '推算中...',
+        defaultText: '🔮 让Kitty帮你算算~',
+        delay: 500,
+        validate: () => {
+            const birthDate = document.getElementById('bazi-date').value;
+            const hourIndex = parseInt(document.getElementById('bazi-hour').value);
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            if (!birthDate) {
+                return { valid: false, message: '请选择出生日期' };
             }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>推算八字</span><span class="btn-glow"></span>';
-        }, 500);
+            return { valid: true, data: { birthDate, hourIndex, gender } };
+        },
+        calculate: (data) => BaZi.calculate(data.birthDate, data.hourIndex, data.gender),
+        render: (result) => BaZi.renderResult(result)
     });
+    init();
 }
 
 /**
- * 姓名模块初始化
+ * 姓名模块初始化（工厂模式）
  */
-function initName() {
-    const submitBtn = document.getElementById('name-submit');
+function initNameModule() {
     const nameInput = document.getElementById('name-input');
-    const resultDiv = document.getElementById('name-result');
-
-    submitBtn.addEventListener('click', () => {
-        const name = nameInput.value.trim();
-
-        if (!name) {
-            alert('请输入姓名');
-            return;
-        }
-
-        // 检查是否为中文
-        if (!/^[\u4e00-\u9fa5]+$/.test(name)) {
-            alert('请输入中文姓名');
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>分析中...</span>';
-
-        setTimeout(() => {
-            try {
-                const result = NameAnalysis.analyze(name);
-                resultDiv.innerHTML = NameAnalysis.renderResult(result);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('name', { name });
-
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (error) {
-                console.error('姓名分析错误:', error);
-                resultDiv.innerHTML = '<div class="analysis-card"><p>分析出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>分析姓名</span><span class="btn-glow"></span>';
-        }, 500);
-    });
+    const submitBtn = document.getElementById('name-submit');
 
     // 回车提交
-    nameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            submitBtn.click();
-        }
+    if (nameInput && submitBtn) {
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitBtn.click();
+        });
+    }
+
+    const init = createModuleInitializer({
+        name: 'name',
+        submitId: 'name-submit',
+        resultId: 'name-result',
+        loadingText: '分析中...',
+        defaultText: '💖 解锁名字密码',
+        delay: 500,
+        validate: () => {
+            const name = document.getElementById('name-input').value.trim();
+            if (!name) return { valid: false, message: '请输入姓名' };
+            if (!/^[\u4e00-\u9fa5]+$/.test(name)) return { valid: false, message: '请输入中文姓名' };
+            return { valid: true, data: { name } };
+        },
+        calculate: (data) => NameAnalysis.analyze(data.name),
+        render: (result) => NameAnalysis.renderResult(result)
     });
+    init();
 }
 
 /**
- * 易经占卜模块初始化
+ * 易经占卜模块初始化（工厂模式 + 动画）
  */
-function initYiJing() {
-    const submitBtn = document.getElementById('yijing-submit');
-    const questionInput = document.getElementById('yijing-question');
+function initYiJingModule() {
     const animationDiv = document.getElementById('yijing-animation');
     const resultDiv = document.getElementById('yijing-result');
+    const submitBtn = document.getElementById('yijing-submit');
+
+    if (!submitBtn) return;
 
     submitBtn.addEventListener('click', () => {
-        const question = questionInput.value.trim() || '求问吉凶';
+        const question = document.getElementById('yijing-question').value.trim() || '求问吉凶';
 
         submitBtn.disabled = true;
-        resultDiv.classList.add('hidden');
-        animationDiv.classList.remove('hidden');
+        if (resultDiv) resultDiv.classList.add('hidden');
+        if (animationDiv) animationDiv.classList.remove('hidden');
 
-        // 占卜动画
         setTimeout(() => {
             try {
                 const result = YiJing.divine(question);
-                animationDiv.classList.add('hidden');
-                resultDiv.innerHTML = YiJing.renderResult(result);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('yijing', { question });
-
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (animationDiv) animationDiv.classList.add('hidden');
+                if (resultDiv) {
+                    resultDiv.innerHTML = YiJing.renderResult(result);
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                if (typeof Tracker !== 'undefined') {
+                    Tracker.logFeatureUsage('yijing', { question });
+                }
             } catch (error) {
                 console.error('占卜错误:', error);
-                animationDiv.classList.add('hidden');
-                resultDiv.innerHTML = '<div class="analysis-card"><p>占卜出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
+                if (animationDiv) animationDiv.classList.add('hidden');
+                if (resultDiv) {
+                    resultDiv.innerHTML = '<div class="analysis-card"><p>占卜出错，请重试</p></div>';
+                    resultDiv.classList.remove('hidden');
+                }
             }
-
             submitBtn.disabled = false;
         }, 2000);
     });
 }
 
 /**
- * 每日运势模块初始化
+ * 每日运势模块初始化（工厂模式）
  */
-function initDaily() {
-    const submitBtn = document.getElementById('daily-submit');
-    const birthInput = document.getElementById('daily-birthdate');
-    const hourSelect = document.getElementById('daily-hour');
-    const nameInput = document.getElementById('daily-name');
-    const resultDiv = document.getElementById('daily-result');
-
+function initDailyModule() {
     // 设置默认日期
-    const defaultDate = new Date();
-    defaultDate.setFullYear(defaultDate.getFullYear() - 25);
-    birthInput.valueAsDate = defaultDate;
+    const birthInput = document.getElementById('daily-birthdate');
+    if (birthInput) {
+        const defaultDate = new Date();
+        defaultDate.setFullYear(defaultDate.getFullYear() - 25);
+        birthInput.valueAsDate = defaultDate;
+    }
 
-    submitBtn.addEventListener('click', () => {
-        const birthDate = birthInput.value;
-        const hourValue = hourSelect ? hourSelect.value : '';
-        const genderRadio = document.querySelector('input[name="daily-gender"]:checked');
-        const gender = genderRadio ? genderRadio.value : '';
-        const name = nameInput ? nameInput.value.trim() : '';
+    const init = createModuleInitializer({
+        name: 'daily',
+        submitId: 'daily-submit',
+        resultId: 'daily-result',
+        loadingText: 'Kitty掐指一算中... 🐱',
+        defaultText: '🔮 看看今天的运气~',
+        delay: 500,
+        validate: () => {
+            const birthDate = document.getElementById('daily-birthdate').value;
+            const hourSelect = document.getElementById('daily-hour');
+            const genderRadio = document.querySelector('input[name="daily-gender"]:checked');
+            const nameInput = document.getElementById('daily-name');
 
-        if (!birthDate) {
-            alert('喵呜~ 至少要告诉Kitty你的生日嘛！😿');
-            return;
-        }
+            if (!birthDate) return { valid: false, message: '喵呜~ 至少要告诉Kitty你的生日嘛！😿' };
 
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Kitty掐指一算中... 🐱</span>';
-
-        setTimeout(() => {
-            try {
-                // 传入额外参数
-                const options = {
-                    hour: hourValue ? parseInt(hourValue) : null,
-                    gender: gender || null,
-                    name: name || null
-                };
-                const result = DailyFortune.calculate(birthDate, options);
-                resultDiv.innerHTML = DailyFortune.renderResult(result, options);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('daily', { birthdate: birthDate, hour: hourValue, gender, name });
-
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                // 绑定躲猫猫按钮事件
-                const hideAndSeekBtn = document.getElementById('daily-hide-seek-btn');
-                if (hideAndSeekBtn) {
-                    hideAndSeekBtn.addEventListener('click', () => {
-                        // 切换到良辰吉日tab（通过 hash 路由）
-                        window.location.hash = 'auspicious';
-                    });
+            return {
+                valid: true,
+                data: {
+                    birthDate,
+                    hour: hourSelect?.value ? parseInt(hourSelect.value) : null,
+                    gender: genderRadio?.value || null,
+                    name: nameInput?.value.trim() || null
                 }
-            } catch (error) {
-                console.error('运势计算错误:', error);
-                resultDiv.innerHTML = '<div class="analysis-card"><p>计算出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
+            };
+        },
+        calculate: (data) => {
+            const todayGanZhi = DailyFortune.getTodayGanZhi();
+            return DailyFortune.calculate(data.birthDate, todayGanZhi, data);
+        },
+        render: (result, data) => DailyFortune.renderResult(result, data),
+        onSuccess: () => {
+            // 绑定躲猫猫按钮事件
+            const hideAndSeekBtn = document.getElementById('daily-hide-seek-btn');
+            if (hideAndSeekBtn) {
+                hideAndSeekBtn.addEventListener('click', () => {
+                    window.location.hash = 'auspicious';
+                });
             }
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🔮 看看今天的运气~</span><span class="btn-glow"></span>';
-        }, 500);
+        }
     });
+    init();
 }
 
 /**
@@ -489,85 +523,61 @@ function initFengShui() {
 }
 
 /**
- * 婚恋匹配模块初始化
+ * 婚恋匹配模块初始化（工厂模式）
  */
-function initMarriage() {
+function initMarriageModule() {
+    // 设置默认日期
     const date1Input = document.getElementById('marriage-date1');
     const date2Input = document.getElementById('marriage-date2');
-    const submitBtn = document.getElementById('marriage-submit');
-    const resultDiv = document.getElementById('marriage-result');
+    if (date1Input && date2Input) {
+        const defaultDate1 = new Date();
+        defaultDate1.setFullYear(defaultDate1.getFullYear() - 30);
+        const defaultDate2 = new Date();
+        defaultDate2.setFullYear(defaultDate2.getFullYear() - 28);
+        date1Input.valueAsDate = defaultDate1;
+        date2Input.valueAsDate = defaultDate2;
+    }
 
-    // 设置默认日期（30年前和28年前）
-    const defaultDate1 = new Date();
-    defaultDate1.setFullYear(defaultDate1.getFullYear() - 30);
-    const defaultDate2 = new Date();
-    defaultDate2.setFullYear(defaultDate2.getFullYear() - 28);
+    const init = createModuleInitializer({
+        name: 'marriage',
+        submitId: 'marriage-submit',
+        resultId: 'marriage-result',
+        loadingText: '💕 Kitty正在计算八字缘分...',
+        defaultText: '💕 八字+姓名深度配对~',
+        delay: 1000,
+        validate: () => {
+            const name1 = document.getElementById('marriage-name1').value.trim();
+            const name2 = document.getElementById('marriage-name2').value.trim();
+            const dateValue1 = document.getElementById('marriage-date1').value;
+            const dateValue2 = document.getElementById('marriage-date2').value;
+            const hour1 = parseInt(document.getElementById('marriage-hour1').value);
+            const hour2 = parseInt(document.getElementById('marriage-hour2').value);
+            const gender1 = document.querySelector('input[name="marriage-gender1"]:checked').value;
+            const gender2 = document.querySelector('input[name="marriage-gender2"]:checked').value;
 
-    date1Input.valueAsDate = defaultDate1;
-    date2Input.valueAsDate = defaultDate2;
-
-    submitBtn.addEventListener('click', () => {
-        const name1 = document.getElementById('marriage-name1').value.trim();
-        const name2 = document.getElementById('marriage-name2').value.trim();
-        const dateValue1 = document.getElementById('marriage-date1').value;
-        const dateValue2 = document.getElementById('marriage-date2').value;
-        const hour1 = parseInt(document.getElementById('marriage-hour1').value);
-        const hour2 = parseInt(document.getElementById('marriage-hour2').value);
-        const gender1 = document.querySelector('input[name="marriage-gender1"]:checked').value;
-        const gender2 = document.querySelector('input[name="marriage-gender2"]:checked').value;
-
-        // 验证输入
-        if (!name1 || !name2) {
-            alert('请输入双方的姓名哦~');
-            return;
-        }
-
-        if (!/^[\u4e00-\u9fa5]+$/.test(name1) || !/^[\u4e00-\u9fa5]+$/.test(name2)) {
-            alert('请输入中文姓名~');
-            return;
-        }
-
-        if (!dateValue1 || !dateValue2) {
-            alert('请选择双方的出生日期~');
-            return;
-        }
-
-        const person1 = {
-            name: name1,
-            date: new Date(dateValue1),
-            hour: hour1,
-            gender: gender1
-        };
-        const person2 = {
-            name: name2,
-            date: new Date(dateValue2),
-            hour: hour2,
-            gender: gender2
-        };
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>💕 Kitty正在计算八字缘分...</span>';
-
-        setTimeout(() => {
-            try {
-                const result = Marriage.analyze(person1, person2);
-                resultDiv.innerHTML = Marriage.renderResult(result);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('marriage', { name1, name2, date1: dateValue1, date2: dateValue2, gender1, gender2 });
-
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (error) {
-                console.error('婚恋分析错误:', error);
-                resultDiv.innerHTML = '<div class="analysis-card"><p>分析出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
+            if (!name1 || !name2) {
+                return { valid: false, message: '请输入双方的姓名哦~' };
+            }
+            if (!/^[\u4e00-\u9fa5]+$/.test(name1) || !/^[\u4e00-\u9fa5]+$/.test(name2)) {
+                return { valid: false, message: '请输入中文姓名~' };
+            }
+            if (!dateValue1 || !dateValue2) {
+                return { valid: false, message: '请选择双方的出生日期~' };
             }
 
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>💕 八字+姓名深度配对~</span><span class="btn-glow"></span>';
-        }, 1000);
+            return {
+                valid: true,
+                data: {
+                    person1: { name: name1, date: new Date(dateValue1), hour: hour1, gender: gender1 },
+                    person2: { name: name2, date: new Date(dateValue2), hour: hour2, gender: gender2 },
+                    name1, name2, dateValue1, dateValue2, gender1, gender2
+                }
+            };
+        },
+        calculate: (data) => Marriage.analyze(data.person1, data.person2),
+        render: (result) => Marriage.renderResult(result)
     });
+    init();
 }
 
 /**
@@ -800,76 +810,69 @@ function initFaceReading() {
 }
 
 /**
- * 良辰吉日模块初始化
+ * 2026流年运势模块初始化
+ * 注意：事件绑定在 yearly2026.js 中处理，这里只设置默认值
  */
-function initAuspicious() {
-    const birthInput = document.getElementById('auspicious-birthdate');
-    const hourSelect = document.getElementById('auspicious-hour');
-    const activitySelect = document.getElementById('auspicious-activity');
-    const targetDateInput = document.getElementById('auspicious-target-date');
-    const submitBtn = document.getElementById('auspicious-submit');
-    const resultDiv = document.getElementById('auspicious-result');
+function initYearly2026Module() {
+    // 设置默认生日（25年前）
+    const birthInput = document.getElementById('yearly2026-birthdate');
+    if (birthInput && !birthInput.value) {
+        const defaultDate = new Date();
+        defaultDate.setFullYear(defaultDate.getFullYear() - 25);
+        birthInput.valueAsDate = defaultDate;
+    }
+}
 
-    if (!birthInput || !submitBtn) {
-        console.error('Auspicious day elements not found');
-        return;
+/**
+ * 良辰吉日模块初始化（工厂模式）
+ */
+function initAuspiciousModule() {
+    // 设置默认日期
+    const birthInput = document.getElementById('auspicious-birthdate');
+    const targetDateInput = document.getElementById('auspicious-target-date');
+    if (birthInput) {
+        const defaultBirthDate = new Date();
+        defaultBirthDate.setFullYear(defaultBirthDate.getFullYear() - 30);
+        birthInput.valueAsDate = defaultBirthDate;
+    }
+    if (targetDateInput) {
+        const defaultTargetDate = new Date();
+        defaultTargetDate.setDate(defaultTargetDate.getDate() + 7);
+        targetDateInput.valueAsDate = defaultTargetDate;
     }
 
-    // 设置默认生日（30年前）
-    const defaultBirthDate = new Date();
-    defaultBirthDate.setFullYear(defaultBirthDate.getFullYear() - 30);
-    birthInput.valueAsDate = defaultBirthDate;
+    const init = createModuleInitializer({
+        name: 'auspicious',
+        submitId: 'auspicious-submit',
+        resultId: 'auspicious-result',
+        loadingText: 'Kitty正在算日子...',
+        defaultText: '🔮 Kitty帮你选日子~',
+        delay: 800,
+        validate: () => {
+            const birthDate = document.getElementById('auspicious-birthdate').value;
+            const hourIndex = parseInt(document.getElementById('auspicious-hour').value);
+            const gender = document.querySelector('input[name="auspicious-gender"]:checked').value;
+            const activity = document.getElementById('auspicious-activity').value;
+            const targetDateValue = document.getElementById('auspicious-target-date').value;
 
-    // 设置默认目标日期（一周后）
-    const defaultTargetDate = new Date();
-    defaultTargetDate.setDate(defaultTargetDate.getDate() + 7);
-    targetDateInput.valueAsDate = defaultTargetDate;
-
-    submitBtn.addEventListener('click', () => {
-        const birthDate = birthInput.value;
-        const hourIndex = parseInt(hourSelect.value);
-        const gender = document.querySelector('input[name="auspicious-gender"]:checked').value;
-        const activity = activitySelect.value;
-        const targetDateValue = targetDateInput.value;
-
-        if (!birthDate) {
-            alert('请选择你的出生日期哦~');
-            return;
-        }
-
-        if (!targetDateValue) {
-            alert('请选择你计划的日期哦~');
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Kitty正在算日子...</span>';
-
-        setTimeout(() => {
-            try {
-                // 计算用户八字
-                const userBazi = BaZi.calculate(birthDate, hourIndex, gender);
-                const targetDate = new Date(targetDateValue);
-
-                // 生成择日报告
-                const report = AuspiciousDay.generateReport(targetDate, activity, userBazi);
-
-                // 渲染结果
-                resultDiv.innerHTML = AuspiciousDay.renderResult(report);
-                resultDiv.classList.remove('hidden');
-
-                // 记录功能使用
-                Tracker.logFeatureUsage('auspicious', { birthdate: birthDate, gender, activity, targetDate: targetDateValue });
-
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (error) {
-                console.error('择日分析错误:', error);
-                resultDiv.innerHTML = '<div class="analysis-card"><p>分析出错，请重试</p></div>';
-                resultDiv.classList.remove('hidden');
+            if (!birthDate) {
+                return { valid: false, message: '请选择你的出生日期哦~' };
+            }
+            if (!targetDateValue) {
+                return { valid: false, message: '请选择你计划的日期哦~' };
             }
 
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>🔮 Kitty帮你选日子~</span><span class="btn-glow"></span>';
-        }, 800);
+            return {
+                valid: true,
+                data: { birthDate, hourIndex, gender, activity, targetDateValue }
+            };
+        },
+        calculate: (data) => {
+            const userBazi = BaZi.calculate(data.birthDate, data.hourIndex, data.gender);
+            const targetDate = new Date(data.targetDateValue);
+            return AuspiciousDay.generateReport(targetDate, data.activity, userBazi);
+        },
+        render: (result) => AuspiciousDay.renderResult(result)
     });
+    init();
 }

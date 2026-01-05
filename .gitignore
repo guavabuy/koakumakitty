@@ -8,11 +8,9 @@ node_modules/
 .env
 *client_secret*.json
 
-### Runtime data (sqlite)
-backend/data/*.db
-backend/data/*.db-*
-legacy/fortune-telling-app/backend/data/*.db
-legacy/fortune-telling-app/backend/data/*.db-*
+### SEO files (managed separately)
+robots.txt
+sitemap.xml
 
 ### Large assets (optional)
 *.pdf
