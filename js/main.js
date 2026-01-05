@@ -95,6 +95,12 @@ function createModuleInitializer(config) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // 初始化语言切换浮动球
+    initLangGlobe();
+
+    // 初始化更多功能折叠
+    initMoreToggle();
+
     // 初始化路由
     initTabs();
 
@@ -114,6 +120,56 @@ document.addEventListener('DOMContentLoaded', function () {
     // 更新每日日期显示
     updateDailyDate();
 });
+
+/**
+ * 初始化语言切换浮动球
+ */
+function initLangGlobe() {
+    const btn = document.querySelector('.lang-globe-btn');
+    const dropdown = document.querySelector('.lang-dropdown');
+
+    if (!btn || !dropdown) return;
+
+    // 点击切换展开/收起
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', !isExpanded);
+        dropdown.classList.toggle('hidden', isExpanded);
+    });
+
+    // 点击其他区域收起
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.lang-globe-container')) {
+            btn.setAttribute('aria-expanded', 'false');
+            dropdown.classList.add('hidden');
+        }
+    });
+
+    // ESC 键收起
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            btn.setAttribute('aria-expanded', 'false');
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+/**
+ * 初始化更多功能折叠按钮
+ */
+function initMoreToggle() {
+    const moreToggle = document.querySelector('.more-toggle');
+    const moreGrid = document.querySelector('.more-grid');
+
+    if (!moreToggle || !moreGrid) return;
+
+    moreToggle.addEventListener('click', () => {
+        const isExpanded = moreToggle.getAttribute('aria-expanded') === 'true';
+        moreToggle.setAttribute('aria-expanded', !isExpanded);
+        moreGrid.classList.toggle('hidden', isExpanded);
+    });
+}
 
 /**
  * 从 URL hash 中解析 tabKey
@@ -136,78 +192,98 @@ function getTabKeyFromHash() {
 /**
  * 激活指定的 Tab
  * 统一处理 UI 切换 + title 更新 + 滚动控制
+ * 支持 quick-card（快速入口）和 nav-tab（更多功能）两种选择器
  * @param {string} tabKey - 要激活的 tab key
  */
 function activateTab(tabKey) {
-    const tabs = document.querySelectorAll('.nav-tab');
+    const quickCards = document.querySelectorAll('.quick-card');
+    const moreTabs = document.querySelectorAll('.more-grid .nav-tab');
     const contents = document.querySelectorAll('.tab-content');
-    
+
     // 验证 tabKey 有效性
     const targetContent = document.getElementById(tabKey);
-    const targetTab = document.querySelector(`.nav-tab[data-tab="${tabKey}"]`);
-    
-    if (!targetContent || !targetTab) {
+
+    if (!targetContent) {
         // 无效的 tabKey，回退到默认
         tabKey = TAB_CONFIG.defaultTab;
         // 修正 URL（静默替换，不触发 hashchange）
         history.replaceState(null, '', window.location.pathname);
     }
-    
+
     // 移除所有活动状态
-    tabs.forEach(t => t.classList.remove('active'));
+    quickCards.forEach(t => t.classList.remove('active'));
+    moreTabs.forEach(t => t.classList.remove('active'));
     contents.forEach(c => c.classList.remove('active'));
-    
+
     // 添加当前活动状态
-    const activeTab = document.querySelector(`.nav-tab[data-tab="${tabKey}"]`);
+    const activeQuickCard = document.querySelector(`.quick-card[data-tab="${tabKey}"]`);
+    const activeMoreTab = document.querySelector(`.more-grid .nav-tab[data-tab="${tabKey}"]`);
     const activeContent = document.getElementById(tabKey);
-    
-    if (activeTab) activeTab.classList.add('active');
+
+    if (activeQuickCard) activeQuickCard.classList.add('active');
+    if (activeMoreTab) activeMoreTab.classList.add('active');
     if (activeContent) activeContent.classList.add('active');
-    
+
+    // 如果激活的是"更多功能"中的tab，自动展开折叠区
+    if (activeMoreTab) {
+        const moreToggle = document.querySelector('.more-toggle');
+        const moreGrid = document.querySelector('.more-grid');
+        if (moreToggle && moreGrid) {
+            moreToggle.setAttribute('aria-expanded', 'true');
+            moreGrid.classList.remove('hidden');
+        }
+    }
+
     // 更新 document.title
     if (TAB_CONFIG.titles[tabKey]) {
         document.title = TAB_CONFIG.titles[tabKey];
     }
-    
+
     // 控制滚动，防止 hash 导致的页面跳动
     window.scrollTo(0, 0);
 }
 
 /**
  * 标签页切换（Hash 路由版本）
+ * 支持 quick-card（快速入口）和 nav-tab（更多功能）两种选择器
  * 点击 Tab 时只更新 hash，由 hashchange 统一触发 UI 更新
  */
 function initTabs() {
-    const tabs = document.querySelectorAll('.nav-tab');
-    
+    // 快速入口卡片
+    const quickCards = document.querySelectorAll('.quick-card');
+    // 更多功能中的 tab
+    const moreTabs = document.querySelectorAll('.more-grid .nav-tab');
+    // 合并所有可切换的元素
+    const allTabs = [...quickCards, ...moreTabs];
+
     // 绑定点击事件：只更新 hash，不直接切换 UI
-    tabs.forEach(tab => {
+    allTabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault();
             const targetTab = tab.getAttribute('data-tab');
-            
+
             // 更新 URL hash（会触发 hashchange 事件）
             // 使用 pushState 而不是直接设置 hash，以便更好地控制历史记录
             const newUrl = `${window.location.pathname}#${targetTab}`;
             history.pushState(null, '', newUrl);
-            
+
             // 手动触发 UI 更新（pushState 不会自动触发 hashchange）
             activateTab(targetTab);
         });
     });
-    
+
     // 监听 popstate 事件（浏览器后退/前进按钮）
     window.addEventListener('popstate', () => {
         const tabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
         activateTab(tabKey);
     });
-    
+
     // 监听 hashchange 事件（直接修改 hash 或点击带 # 的链接）
     window.addEventListener('hashchange', () => {
         const tabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
         activateTab(tabKey);
     });
-    
+
     // 页面初始化：读取当前 hash 并激活对应 Tab
     const initialTabKey = getTabKeyFromHash() || TAB_CONFIG.defaultTab;
     activateTab(initialTabKey);

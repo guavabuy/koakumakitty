@@ -120,14 +120,27 @@
     <div class="container">
         <!-- ヘッダー（言語切替付き） -->
         <header class="header">
-            <div class="lang-switch">
-                <a href="/" class="lang-link">中文</a>
-                <span class="lang-sep">|</span>
-                <a href="/en/" class="lang-link">EN</a>
-                <span class="lang-sep">|</span>
-                <a href="/ja/" class="lang-link active">日本語</a>
-                <span class="lang-sep">•</span>
-                <a href="/blog/" class="lang-link blog-link">📝 Blog</a>
+            <div class="header-links">
+                <a href="/blog/" class="blog-link">📝 Blog</a>
+                <div class="lang-globe-container">
+                    <button class="lang-globe-btn" aria-label="言語を切り替え" aria-expanded="false">
+                        <span class="globe-icon">🌐</span>
+                    </button>
+                    <div class="lang-dropdown hidden">
+                        <a href="/" class="lang-option" data-lang="zh">
+                            <span class="lang-flag">🇨🇳</span>
+                            <span class="lang-name">中文</span>
+                        </a>
+                        <a href="/en/" class="lang-option" data-lang="en">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                        </a>
+                        <a href="/ja/" class="lang-option active" data-lang="ja">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span class="lang-name">日本語</span>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="logo">
                 <img src="../images/kitty-icon.jpg" alt="KOAKUMA KITTY 占い - 倪海厦天紀八字システム" class="logo-image" width="60" height="60">
@@ -156,39 +169,58 @@
         </section>
 
         <!-- ナビゲーション -->
-        <nav class="nav-tabs">
-            <button class="nav-tab full-width active" data-tab="yearly2026">
-                <span class="tab-icon">🐴</span>
-                <span class="tab-text">2026運勢</span>
-            </button>
-            <button class="nav-tab" data-tab="daily">
-                <span class="tab-icon">🌙</span>
-                <span class="tab-text">今日の運勢</span>
-            </button>
-            <button class="nav-tab" data-tab="bazi">
-                <span class="tab-icon">🔮</span>
-                <span class="tab-text">八字命盤</span>
-            </button>
-            <button class="nav-tab" data-tab="name">
-                <span class="tab-icon">💌</span>
-                <span class="tab-text">名前解読</span>
-            </button>
-            <button class="nav-tab" data-tab="yijing">
-                <span class="tab-icon">🎱</span>
-                <span class="tab-text">易経おみくじ</span>
-            </button>
-            <button class="nav-tab" data-tab="fengshui">
-                <span class="tab-icon">🏠</span>
-                <span class="tab-text">風水分析</span>
-            </button>
-            <button class="nav-tab" data-tab="marriage">
-                <span class="tab-icon">💑</span>
-                <span class="tab-text">相性診断</span>
-            </button>
-            <button class="nav-tab" data-tab="auspicious">
-                <span class="tab-icon">📅</span>
-                <span class="tab-text">吉日選び</span>
-            </button>
+        <nav class="nav-section">
+            <!-- クイックアクセス -->
+            <div class="quick-access">
+                <h3 class="quick-access-title">✨ 人気の機能 ✨</h3>
+                <div class="quick-cards">
+                    <button class="quick-card active" data-tab="yearly2026">
+                        <span class="quick-icon">🐴</span>
+                        <span class="quick-title">2026運勢</span>
+                        <span class="quick-desc">丙午年の運勢分析</span>
+                    </button>
+                    <button class="quick-card" data-tab="daily">
+                        <span class="quick-icon">🌙</span>
+                        <span class="quick-title">今日の運勢</span>
+                        <span class="quick-desc">毎日の吉凶チェック</span>
+                    </button>
+                    <button class="quick-card" data-tab="bazi">
+                        <span class="quick-icon">🔮</span>
+                        <span class="quick-title">八字命盤</span>
+                        <span class="quick-desc">四柱推命の詳細</span>
+                    </button>
+                </div>
+            </div>
+            <!-- その他の機能 -->
+            <div class="more-features">
+                <button class="more-toggle" aria-expanded="false">
+                    <span class="more-icon">📦</span>
+                    <span class="more-text">その他の機能</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+                <div class="more-grid hidden">
+                    <button class="nav-tab" data-tab="name">
+                        <span class="tab-icon">💌</span>
+                        <span class="tab-text">名前解読</span>
+                    </button>
+                    <button class="nav-tab" data-tab="yijing">
+                        <span class="tab-icon">🎱</span>
+                        <span class="tab-text">易経おみくじ</span>
+                    </button>
+                    <button class="nav-tab" data-tab="fengshui">
+                        <span class="tab-icon">🏠</span>
+                        <span class="tab-text">風水分析</span>
+                    </button>
+                    <button class="nav-tab" data-tab="marriage">
+                        <span class="tab-icon">💑</span>
+                        <span class="tab-text">相性診断</span>
+                    </button>
+                    <button class="nav-tab" data-tab="auspicious">
+                        <span class="tab-icon">📅</span>
+                        <span class="tab-text">吉日選び</span>
+                    </button>
+                </div>
+            </div>
         </nav>
 
         <!-- コンテンツエリア -->

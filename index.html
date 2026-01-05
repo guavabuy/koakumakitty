@@ -118,14 +118,27 @@
     <div class="container">
         <!-- 头部 -->
         <header class="header">
-            <div class="lang-switch">
-                <a href="/" class="lang-link active">中文</a>
-                <span class="lang-sep">|</span>
-                <a href="/en/" class="lang-link">EN</a>
-                <span class="lang-sep">|</span>
-                <a href="/ja/" class="lang-link">日本語</a>
-                <span class="lang-sep">•</span>
-                <a href="/blog/" class="lang-link blog-link">📝 Blog</a>
+            <div class="header-links">
+                <a href="/blog/" class="blog-link">📝 Blog</a>
+                <div class="lang-globe-container">
+                    <button class="lang-globe-btn" aria-label="切换语言" aria-expanded="false">
+                        <span class="globe-icon">🌐</span>
+                    </button>
+                    <div class="lang-dropdown hidden">
+                        <a href="/" class="lang-option active" data-lang="zh">
+                            <span class="lang-flag">🇨🇳</span>
+                            <span class="lang-name">中文</span>
+                        </a>
+                        <a href="/en/" class="lang-option" data-lang="en">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                        </a>
+                        <a href="/ja/" class="lang-option" data-lang="ja">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span class="lang-name">日本語</span>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="logo">
                 <img src="images/kitty-icon.jpg" alt="KOAKUMA KITTY [易占] Fortune - 倪海厦天纪八字排盘系统" class="logo-image" width="60" height="60">
@@ -151,45 +164,58 @@
         </section>
 
         <!-- 导航 -->
-        <!-- 导航 -->
-        <nav class="nav-tabs">
-            <button class="nav-tab full-width active" data-tab="yearly2026">
-                <span class="tab-icon">🐴</span>
-                <span class="tab-text">2026丙午年运势</span>
-            </button>
-            <button class="nav-tab" data-tab="daily">
-                <span class="tab-icon">🌙</span>
-                <span class="tab-text">今日运势</span>
-            </button>
-            <button class="nav-tab" data-tab="bazi">
-                <span class="tab-icon">🔮</span>
-                <span class="tab-text">八字命盘</span>
-            </button>
-            <button class="nav-tab" data-tab="name">
-                <span class="tab-icon">💌</span>
-                <span class="tab-text">名字解密</span>
-            </button>
-            <button class="nav-tab" data-tab="yijing">
-                <span class="tab-icon">🎱</span>
-                <span class="tab-text">摇一摇</span>
-            </button>
-            <button class="nav-tab" data-tab="fengshui">
-                <span class="tab-icon">🏠</span>
-                <span class="tab-text">风水分析</span>
-            </button>
-            <button class="nav-tab" data-tab="marriage">
-                <span class="tab-icon">💑</span>
-                <span class="tab-text">姻缘配对</span>
-            </button>
-            <!-- 面相功能暂时下线 -->
-            <button class="nav-tab" data-tab="facereading" style="display:none">
-                <span class="tab-icon">👀</span>
-                <span class="tab-text">观相</span>
-            </button>
-            <button class="nav-tab" data-tab="auspicious">
-                <span class="tab-icon">📅</span>
-                <span class="tab-text">良辰吉日</span>
-            </button>
+        <nav class="nav-section">
+            <!-- 快速入口 -->
+            <div class="quick-access">
+                <h3 class="quick-access-title">✨ 热门功能 ✨</h3>
+                <div class="quick-cards">
+                    <button class="quick-card active" data-tab="yearly2026">
+                        <span class="quick-icon">🐴</span>
+                        <span class="quick-title">2026运势</span>
+                        <span class="quick-desc">丙午年流年分析</span>
+                    </button>
+                    <button class="quick-card" data-tab="daily">
+                        <span class="quick-icon">🌙</span>
+                        <span class="quick-title">今日运势</span>
+                        <span class="quick-desc">每日吉凶速查</span>
+                    </button>
+                    <button class="quick-card" data-tab="bazi">
+                        <span class="quick-icon">🔮</span>
+                        <span class="quick-title">八字命盘</span>
+                        <span class="quick-desc">四柱八字详解</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 更多功能 -->
+            <div class="more-features">
+                <button class="more-toggle" aria-expanded="false">
+                    <span class="more-icon">📦</span>
+                    <span class="more-text">更多功能</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+                <div class="more-grid hidden">
+                    <button class="nav-tab" data-tab="name">
+                        <span class="tab-icon">💌</span>
+                        <span class="tab-text">名字解密</span>
+                    </button>
+                    <button class="nav-tab" data-tab="yijing">
+                        <span class="tab-icon">🎱</span>
+                        <span class="tab-text">摇一摇</span>
+                    </button>
+                    <button class="nav-tab" data-tab="fengshui">
+                        <span class="tab-icon">🏠</span>
+                        <span class="tab-text">风水分析</span>
+                    </button>
+                    <button class="nav-tab" data-tab="marriage">
+                        <span class="tab-icon">💑</span>
+                        <span class="tab-text">姻缘配对</span>
+                    </button>
+                    <button class="nav-tab" data-tab="auspicious">
+                        <span class="tab-icon">📅</span>
+                        <span class="tab-text">良辰吉日</span>
+                    </button>
+                </div>
+            </div>
         </nav>
 
         <!-- 内容区域 -->

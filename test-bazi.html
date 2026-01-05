@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>八字排盘测试</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ccc; padding: 8px; }
+        .pass { background: #d4edda; }
+        .fail { background: #f8d7da; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>八字排盘验证测试</h1>
+    <p>请在本地服务器运行此测试（python3 -m http.server 8080）</p>
+    <div id="results">加载中...</div>
+    <script type="module">
+        import ChineseCalendar from './js/core/calendar.js';
+
+        // 经典测试案例（可验证的八字）
+        const testCases = [
+            // 基准日期验证
+            {
+                date: '1949-10-01',
+                hour: 6,
+                expectedYear: '己丑',
+                expectedMonth: '癸酉',
+                expectedDay: '甲子',
+                note: '1949年10月1日应为甲子日（基准）'
+            },
+            // 立春前测试
+            {
+                date: '2024-02-03',
+                hour: 6,
+                expectedYear: '癸卯',
+                note: '2024年2月3日立春前，还是癸卯年'
+            },
+            // 立春后测试
+            {
+                date: '2024-02-04',
+                hour: 18,
+                expectedYear: '甲辰',
+                note: '2024年2月4日立春后，变为甲辰年'
+            },
+            // 2025年1月测试（还是甲辰年）
+            {
+                date: '2025-01-05',
+                hour: 6,
+                expectedYear: '甲辰',
+                note: '2025年1月5日还是甲辰年（立春前）'
+            },
+            // 节气月份测试
+            {
+                date: '2024-03-05',
+                hour: 6,
+                expectedMonth: '丙寅',
+                note: '2024年3月5日惊蛰前还是寅月'
+            },
+        ];
+
+        let html = '<h2>测试结果</h2>';
+        html += '<table><tr><th>日期</th><th>时辰</th><th>计算年柱</th><th>计算月柱</th><th>计算日柱</th><th>预期</th><th>备注</th></tr>';
+
+        testCases.forEach(tc => {
+            const birthDateTime = ChineseCalendar.buildBirthDateTime(tc.date, tc.hour);
+            const { pillars, debug } = ChineseCalendar.calculateFourPillars(birthDateTime, tc.hour);
+
+            const yearPillar = pillars.year.stem + pillars.year.branch;
+            const monthPillar = pillars.month.stem + pillars.month.branch;
+            const dayPillar = pillars.day.stem + pillars.day.branch;
+
+            let expected = [];
+            let pass = true;
+
+            if (tc.expectedYear) {
+                expected.push('年:' + tc.expectedYear);
+                if (yearPillar !== tc.expectedYear) pass = false;
+            }
+            if (tc.expectedMonth) {
+                expected.push('月:' + tc.expectedMonth);
+                if (monthPillar !== tc.expectedMonth) pass = false;
+            }
+            if (tc.expectedDay) {
+                expected.push('日:' + tc.expectedDay);
+                if (dayPillar !== tc.expectedDay) pass = false;
+            }
+
+            const rowClass = pass ? 'pass' : 'fail';
+
+            html += '<tr class="' + rowClass + '">';
+            html += '<td>' + tc.date + '</td>';
+            html += '<td>' + tc.hour + '</td>';
+            html += '<td>' + yearPillar + '</td>';
+            html += '<td>' + monthPillar + '</td>';
+            html += '<td>' + dayPillar + '</td>';
+            html += '<td>' + expected.join(', ') + '</td>';
+            html += '<td>' + tc.note + '<br>命理年:' + debug.mingLiYear + ', 立春前:' + debug.isBeforeLiChun + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</table>';
+
+        // 今天的日柱
+        const today = new Date();
+        const todayPillar = ChineseCalendar.getDayPillar(today);
+        html += '<h2>今日日柱验证</h2>';
+        html += '<p>今天 (' + today.toLocaleDateString() + ') 日柱: <strong>' + todayPillar.stem + todayPillar.branch + '</strong></p>';
+        html += '<p>请与万年历对比验证！</p>';
+
+        // 用户自定义测试
+        html += '<h2>自定义测试</h2>';
+        html += '<p>出生日期: <input type="date" id="testDate" value="1990-01-01"></p>';
+        html += '<p>时辰: <select id="testHour">';
+        const hours = ['子时(23-1)', '丑时(1-3)', '寅时(3-5)', '卯时(5-7)', '辰时(7-9)', '巳时(9-11)', '午时(11-13)', '未时(13-15)', '申时(15-17)', '酉时(17-19)', '戌时(19-21)', '亥时(21-23)'];
+        hours.forEach((h, i) => {
+            html += '<option value="' + i + '">' + h + '</option>';
+        });
+        html += '</select></p>';
+        html += '<button onclick="testCustom()">计算八字</button>';
+        html += '<div id="customResult"></div>';
+
+        document.getElementById('results').innerHTML = html;
+
+        // 自定义测试函数
+        window.testCustom = function() {
+            const dateStr = document.getElementById('testDate').value;
+            const hourIdx = parseInt(document.getElementById('testHour').value);
+
+            const birthDateTime = ChineseCalendar.buildBirthDateTime(dateStr, hourIdx);
+            const { pillars, debug } = ChineseCalendar.calculateFourPillars(birthDateTime, hourIdx);
+
+            let result = '<h3>八字结果</h3>';
+            result += '<table><tr><th>年柱</th><th>月柱</th><th>日柱</th><th>时柱</th></tr>';
+            result += '<tr>';
+            result += '<td>' + pillars.year.stem + pillars.year.branch + '</td>';
+            result += '<td>' + pillars.month.stem + pillars.month.branch + '</td>';
+            result += '<td>' + pillars.day.stem + pillars.day.branch + '</td>';
+            result += '<td>' + pillars.hour.stem + pillars.hour.branch + '</td>';
+            result += '</tr></table>';
+
+            result += '<h4>调试信息</h4>';
+            result += '<pre>' + JSON.stringify(debug, null, 2) + '</pre>';
+
+            document.getElementById('customResult').innerHTML = result;
+        };
+    </script>
+</body>
+</html>

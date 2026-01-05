@@ -120,14 +120,27 @@
     <div class="container">
         <!-- Header with Language Switch -->
         <header class="header">
-            <div class="lang-switch">
-                <a href="/" class="lang-link">中文</a>
-                <span class="lang-sep">|</span>
-                <a href="/en/" class="lang-link active">EN</a>
-                <span class="lang-sep">|</span>
-                <a href="/ja/" class="lang-link">日本語</a>
-                <span class="lang-sep">•</span>
-                <a href="/blog/" class="lang-link blog-link">📝 Blog</a>
+            <div class="header-links">
+                <a href="/blog/" class="blog-link">📝 Blog</a>
+                <div class="lang-globe-container">
+                    <button class="lang-globe-btn" aria-label="Switch Language" aria-expanded="false">
+                        <span class="globe-icon">🌐</span>
+                    </button>
+                    <div class="lang-dropdown hidden">
+                        <a href="/" class="lang-option" data-lang="zh">
+                            <span class="lang-flag">🇨🇳</span>
+                            <span class="lang-name">中文</span>
+                        </a>
+                        <a href="/en/" class="lang-option active" data-lang="en">
+                            <span class="lang-flag">🇺🇸</span>
+                            <span class="lang-name">English</span>
+                        </a>
+                        <a href="/ja/" class="lang-option" data-lang="ja">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span class="lang-name">日本語</span>
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="logo">
                 <img src="../images/kitty-icon.jpg" alt="KOAKUMA KITTY Fortune - Master Ni Haixia Ba Zi System" class="logo-image" width="60" height="60">
@@ -156,44 +169,58 @@
         </section>
 
         <!-- Navigation -->
-        <nav class="nav-tabs">
-            <button class="nav-tab full-width active" data-tab="yearly2026">
-                <span class="tab-icon">🐴</span>
-                <span class="tab-text">2026 Fortune</span>
-            </button>
-            <button class="nav-tab" data-tab="daily">
-                <span class="tab-icon">🌙</span>
-                <span class="tab-text">Daily Fortune</span>
-            </button>
-            <button class="nav-tab" data-tab="bazi">
-                <span class="tab-icon">🔮</span>
-                <span class="tab-text">Ba Zi</span>
-            </button>
-            <button class="nav-tab" data-tab="name">
-                <span class="tab-icon">💌</span>
-                <span class="tab-text">Name Analysis</span>
-            </button>
-            <button class="nav-tab" data-tab="yijing">
-                <span class="tab-icon">🎱</span>
-                <span class="tab-text">I Ching</span>
-            </button>
-            <button class="nav-tab" data-tab="fengshui">
-                <span class="tab-icon">🏠</span>
-                <span class="tab-text">Feng Shui</span>
-            </button>
-            <button class="nav-tab" data-tab="marriage">
-                <span class="tab-icon">💑</span>
-                <span class="tab-text">Compatibility</span>
-            </button>
-            <!-- Face Reading temporarily disabled -->
-            <button class="nav-tab" data-tab="facereading" style="display:none">
-                <span class="tab-icon">👀</span>
-                <span class="tab-text">Face Reading</span>
-            </button>
-            <button class="nav-tab" data-tab="auspicious">
-                <span class="tab-icon">📅</span>
-                <span class="tab-text">Auspicious Days</span>
-            </button>
+        <nav class="nav-section">
+            <!-- Quick Access -->
+            <div class="quick-access">
+                <h3 class="quick-access-title">✨ Popular Features ✨</h3>
+                <div class="quick-cards">
+                    <button class="quick-card active" data-tab="yearly2026">
+                        <span class="quick-icon">🐴</span>
+                        <span class="quick-title">2026 Fortune</span>
+                        <span class="quick-desc">Fire Horse Year Analysis</span>
+                    </button>
+                    <button class="quick-card" data-tab="daily">
+                        <span class="quick-icon">🌙</span>
+                        <span class="quick-title">Daily Fortune</span>
+                        <span class="quick-desc">Daily luck forecast</span>
+                    </button>
+                    <button class="quick-card" data-tab="bazi">
+                        <span class="quick-icon">🔮</span>
+                        <span class="quick-title">Ba Zi Chart</span>
+                        <span class="quick-desc">Four Pillars reading</span>
+                    </button>
+                </div>
+            </div>
+            <!-- More Features -->
+            <div class="more-features">
+                <button class="more-toggle" aria-expanded="false">
+                    <span class="more-icon">📦</span>
+                    <span class="more-text">More Features</span>
+                    <span class="toggle-arrow">▼</span>
+                </button>
+                <div class="more-grid hidden">
+                    <button class="nav-tab" data-tab="name">
+                        <span class="tab-icon">💌</span>
+                        <span class="tab-text">Name Analysis</span>
+                    </button>
+                    <button class="nav-tab" data-tab="yijing">
+                        <span class="tab-icon">🎱</span>
+                        <span class="tab-text">I Ching</span>
+                    </button>
+                    <button class="nav-tab" data-tab="fengshui">
+                        <span class="tab-icon">🏠</span>
+                        <span class="tab-text">Feng Shui</span>
+                    </button>
+                    <button class="nav-tab" data-tab="marriage">
+                        <span class="tab-icon">💑</span>
+                        <span class="tab-text">Compatibility</span>
+                    </button>
+                    <button class="nav-tab" data-tab="auspicious">
+                        <span class="tab-icon">📅</span>
+                        <span class="tab-text">Auspicious Days</span>
+                    </button>
+                </div>
+            </div>
         </nav>
 
         <!-- Content Area -->

@@ -267,6 +267,41 @@
             }
         }
     </style>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "Koakuma Kitty Blog",
+      "url": "https://koakumakitty.com/blog/",
+      "description": "Explore Feng Shui tips, Ba Zi (Four Pillars) guides, I Ching wisdom, and 2026 fortune insights.",
+      "blogPost": [
+        {
+          "@type": "BlogPosting",
+          "headline": "八字 & Feng Shui Bracelets: Your Personalized Cheat Code to Life?",
+          "url": "https://koakumakitty.com/blog/posts/feng-shui-bracelets-your-personalized-cheat-code-to-life.html",
+          "datePublished": "2026-01-05",
+          "author": {
+              "@type": "Person",
+              "name": "Koakuma Kitty"
+          },
+          "description": "Ever feel like you're playing life on hard mode? Discover how 八字 and Feng Shui bracelets can decode your cosmic blueprint and help you manifest the life you want."
+        },
+        {
+          "@type": "BlogPosting",
+          "headline": "2026 Feng Shui Tips for Your Home",
+          "url": "https://koakumakitty.com/blog/posts/2026-feng-shui-home-tips.html",
+          "datePublished": "2026-01-04",
+           "author": {
+              "@type": "Person",
+              "name": "Koakuma Kitty"
+          },
+          "description": "Discover the best directions and colors for the Year of the Fire Horse to attract wealth, health, and harmony into your living space."
+        }
+      ]
+    }
+    </script>
 </head>
 
 <body>
@@ -294,13 +329,31 @@
                 <h2>📚 Articles</h2>
             </div>
             
-            <!-- Article List Container (dynamically populated from posts.json) -->
+            <!-- Article List Container (Static HTML) -->
             <div class="article-list" id="article-list">
-                <!-- Loading state -->
-                <div class="empty-state" id="loading-state">
-                    <div class="empty-icon">⏳</div>
-                    <p>Loading articles...</p>
-                </div>
+                <!-- Article 1 -->
+                <a href="/blog/posts/feng-shui-bracelets-your-personalized-cheat-code-to-life.html" class="article-card">
+                    <div class="card-header">
+                        <span class="card-tag">🎒 BaZi</span>
+                        <span class="card-date">📅 Jan 5, 2026</span>
+                        <span class="card-date">⏱️ 5 min</span>
+                    </div>
+                    <h3>八字 & Feng Shui Bracelets: Your Personalized Cheat Code to Life?</h3>
+                    <p>Ever feel like you're playing life on hard mode? Discover how 八字 and Feng Shui bracelets can decode your cosmic blueprint and help you manifest the life you want.</p>
+                    <span class="read-more">Read more →</span>
+                </a>
+
+                <!-- Article 2 -->
+                <a href="/blog/posts/2026-feng-shui-home-tips.html" class="article-card">
+                    <div class="card-header">
+                        <span class="card-tag">🏠 Feng Shui</span>
+                        <span class="card-date">📅 Jan 4, 2026</span>
+                        <span class="card-date">⏱️ 5 min</span>
+                    </div>
+                    <h3>2026 Feng Shui Tips for Your Home</h3>
+                    <p>Discover the best directions and colors for the Year of the Fire Horse to attract wealth, health, and harmony into your living space.</p>
+                    <span class="read-more">Read more →</span>
+                </a>
             </div>
         </main>
 
@@ -310,67 +363,6 @@
             <p>For entertainment purposes only</p>
         </footer>
     </div>
-
-    <script>
-        // Load and render articles from posts.json
-        (async function() {
-            const listEl = document.getElementById('article-list');
-            
-            try {
-                const res = await fetch('/blog/posts.json');
-                if (!res.ok) throw new Error('Failed to load posts');
-                
-                const data = await res.json();
-                const posts = data.posts || [];
-                
-                // Clear loading state
-                listEl.innerHTML = '';
-                
-                if (posts.length === 0) {
-                    // Empty state
-                    listEl.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">🐱</div>
-                            <p>Kitty is preparing insightful articles about Feng Shui, Ba Zi, and Chinese astrology. Check back soon~ ✨</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Render articles
-                posts.forEach(post => {
-                    const dateObj = new Date(post.date);
-                    const dateStr = dateObj.toLocaleDateString('en-US', { 
-                        month: 'short', day: 'numeric', year: 'numeric' 
-                    });
-                    
-                    const card = document.createElement('a');
-                    card.href = `/blog/posts/${post.slug}.html`;
-                    card.className = 'article-card';
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <span class="card-tag">${post.tagIcon} ${post.tag}</span>
-                            <span class="card-date">📅 ${dateStr}</span>
-                            ${post.readTime ? `<span class="card-date">⏱️ ${post.readTime}</span>` : ''}
-                        </div>
-                        <h3>${post.title}</h3>
-                        <p>${post.excerpt}</p>
-                        <span class="read-more">Read more →</span>
-                    `;
-                    listEl.appendChild(card);
-                });
-                
-            } catch (err) {
-                console.error('Error loading posts:', err);
-                listEl.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🐱</div>
-                        <p>Kitty is preparing insightful articles about Feng Shui, Ba Zi, and Chinese astrology. Check back soon~ ✨</p>
-                    </div>
-                `;
-            }
-        })();
-    </script>
 </body>
 
 </html>
