@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koakuma Kitty Blog | Feng Shui, Ba Zi & Chinese Astrology Insights</title>
+    <meta name="description" content="Explore Feng Shui tips, Ba Zi (Four Pillars) guides, I Ching wisdom, and 2026 fortune insights on the Koakuma Kitty Blog. Inspired by Master Ni Haixia's teachings.">
+    <meta name="keywords" content="Feng Shui Blog,Ba Zi Guide,Four Pillars,I Ching,Chinese Astrology,2026 Fortune,Master Ni Haixia,Koakuma Kitty">
+    <link rel="canonical" href="https://koakumakitty.com/blog/" />
+    
+    <!-- hreflang -->
+    <link rel="alternate" hreflang="en" href="https://koakumakitty.com/blog/" />
+    <link rel="alternate" hreflang="x-default" href="https://koakumakitty.com/blog/" />
+
+    <!-- Open Graph Tags -->
+    <meta property="og:site_name" content="Koakuma Kitty Blog">
+    <meta property="og:title" content="Koakuma Kitty Blog | Feng Shui & Ba Zi Insights">
+    <meta property="og:description" content="Explore Feng Shui tips, Ba Zi guides, and Chinese astrology insights inspired by Master Ni Haixia.">
+    <meta property="og:url" content="https://koakumakitty.com/blog/">
+    <meta property="og:image" content="https://koakumakitty.com/images/kitty-icon.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <link rel="apple-touch-icon" href="../images/kitty-icon.jpg">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/styles.css">
+    
+    <style>
+        /* Blog Header */
+        .blog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,105,180,0.2);
+        }
+        
+        .blog-header .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .blog-header .logo-link img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+        }
+        
+        .blog-header .logo-link h1 {
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #ff69b4, #9370db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        
+        .blog-header .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .blog-header .nav-item {
+            font-size: 0.85rem;
+            color: #9370db;
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .blog-header .nav-item:hover {
+            background: rgba(147,112,219,0.1);
+        }
+        
+        .blog-header .nav-item.active {
+            background: linear-gradient(135deg, #ff69b4, #9370db);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .blog-header .back-btn {
+            background: linear-gradient(135deg, #ff69b4, #ff8fab);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(255,105,180,0.3);
+        }
+        
+        .blog-header .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,105,180,0.4);
+        }
+        
+        .lang-toggle {
+            display: flex;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .lang-toggle a {
+            color: #aaa;
+            text-decoration: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .lang-toggle a:hover {
+            color: #9370db;
+            background: rgba(147,112,219,0.1);
+        }
+        
+        /* Blog Content */
+        .blog-content {
+            padding: 0.5rem 0 2rem;
+        }
+        
+        .blog-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .blog-title-row h2 {
+            font-size: 1.4rem;
+            color: #333;
+            margin: 0;
+        }
+        
+        /* Article List */
+        .article-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .article-card {
+            background: linear-gradient(135deg, #fff, #fdf8ff);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            border: 1px solid rgba(232,212,248,0.6);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(147,112,219,0.15);
+            border-color: #e8d4f8;
+        }
+        
+        .article-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .article-card .card-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, #f0e6ff, #ffe6f0);
+            color: #9370db;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .article-card .card-date {
+            font-size: 0.75rem;
+            color: #bbb;
+        }
+        
+        .article-card h3 {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 0 0 0.5rem 0;
+            line-height: 1.4;
+        }
+        
+        .article-card p {
+            font-size: 0.9rem;
+            color: #777;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .article-card .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: #ff69b4;
+            font-weight: 500;
+        }
+        
+        /* Empty State (Lightweight, inside list container) */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: #999;
+        }
+        
+        .empty-state .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            opacity: 0.6;
+        }
+        
+        .empty-state p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        /* Footer */
+        .blog-footer {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,105,180,0.15);
+        }
+        
+        .blog-footer p {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin: 0.25rem 0;
+        }
+        
+        /* Mobile */
+        @media (max-width: 600px) {
+            .blog-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .blog-header .header-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .blog-header .logo-link h1 {
+                font-size: 1rem;
+            }
+            
+            .blog-title-row {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Simplified Blog Header -->
+        <header class="blog-header">
+            <a href="/en/" class="logo-link">
+                <img src="../images/kitty-icon.jpg" alt="Koakuma Kitty">
+                <h1>KOAKUMA KITTY</h1>
+            </a>
+            <nav class="header-nav">
+                <span class="nav-item active">Blog</span>
+                <a href="/en/" class="back-btn">🔮 Fortune</a>
+                <div class="lang-toggle">
+                    <a href="/">中</a>
+                    <a href="/en/">EN</a>
+                    <a href="/ja/">日</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Blog Content (Direct Article List) -->
+        <main class="blog-content">
+            <div class="blog-title-row">
+                <h2>📚 Articles</h2>
+            </div>
+            
+            <!-- Article List Container (dynamically populated from posts.json) -->
+            <div class="article-list" id="article-list">
+                <!-- Loading state -->
+                <div class="empty-state" id="loading-state">
+                    <div class="empty-icon">⏳</div>
+                    <p>Loading articles...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="blog-footer">
+            <p>💖 Koakuma Kitty Blog</p>
+            <p>For entertainment purposes only</p>
+        </footer>
+    </div>
+
+    <script>
+        // Load and render articles from posts.json
+        (async function() {
+            const listEl = document.getElementById('article-list');
+            
+            try {
+                const res = await fetch('/blog/posts.json');
+                if (!res.ok) throw new Error('Failed to load posts');
+                
+                const data = await res.json();
+                const posts = data.posts || [];
+                
+                // Clear loading state
+                listEl.innerHTML = '';
+                
+                if (posts.length === 0) {
+                    // Empty state
+                    listEl.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🐱</div>
+                            <p>Kitty is preparing insightful articles about Feng Shui, Ba Zi, and Chinese astrology. Check back soon~ ✨</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Render articles
+                posts.forEach(post => {
+                    const dateObj = new Date(post.date);
+                    const dateStr = dateObj.toLocaleDateString('en-US', { 
+                        month: 'short', day: 'numeric', year: 'numeric' 
+                    });
+                    
+                    const card = document.createElement('a');
+                    card.href = `/blog/posts/${post.slug}.html`;
+                    card.className = 'article-card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span class="card-tag">${post.tagIcon} ${post.tag}</span>
+                            <span class="card-date">📅 ${dateStr}</span>
+                            ${post.readTime ? `<span class="card-date">⏱️ ${post.readTime}</span>` : ''}
+                        </div>
+                        <h3>${post.title}</h3>
+                        <p>${post.excerpt}</p>
+                        <span class="read-more">Read more →</span>
+                    `;
+                    listEl.appendChild(card);
+                });
+                
+            } catch (err) {
+                console.error('Error loading posts:', err);
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🐱</div>
+                        <p>Kitty is preparing insightful articles about Feng Shui, Ba Zi, and Chinese astrology. Check back soon~ ✨</p>
+                    </div>
+                `;
+            }
+        })();
+    </script>
+</body>
+
+</html>
