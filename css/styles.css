@@ -3480,3 +3480,260 @@ textarea.form-input {
         flex: 0 0 calc(50% - 10px);
     }
 }
+
+/* ===== Kitty 人设卡片样式 ===== */
+.kitty-data-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: linear-gradient(135deg, #FFF5F8 0%, #F8F0FF 100%);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.kitty-avatar {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.kitty-speech {
+    flex: 1;
+}
+
+.kitty-intro {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-cherry-pink);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ===== 五行小贴士卡片 ===== */
+.wuxing-tip-card {
+    background: linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 100%);
+    border: 2px solid #81C784;
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin: 15px 0;
+}
+
+.wuxing-tip-card h4 {
+    font-size: 1.1rem;
+    color: #2E7D32;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.wuxing-reason {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.7);
+    border-radius: var(--radius-md);
+}
+
+.wuxing-tips-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.wuxing-tip-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: white;
+    padding: 12px 8px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.wuxing-tip-item .tip-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.wuxing-tip-item .tip-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 3px;
+}
+
+.wuxing-tip-item .tip-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.wuxing-crazy-tip {
+    background: linear-gradient(135deg, #FFE0B2 0%, #FFCCBC 100%);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+}
+
+.wuxing-crazy-tip .crazy-label {
+    font-weight: 700;
+    color: #E65100;
+}
+
+.wuxing-crazy-tip .crazy-value {
+    color: #BF360C;
+    font-size: 0.9rem;
+}
+
+.kitty-comment {
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+    margin: 0;
+    padding-left: 10px;
+    border-left: 3px solid #81C784;
+}
+
+/* ===== 2026年度五行清单 ===== */
+.yearly-wuxing-checklist {
+    background: linear-gradient(135deg, #FCE4EC 0%, #F3E5F5 100%);
+    border: 2px solid var(--color-cherry-pink);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin: 15px 0;
+}
+
+.yearly-wuxing-checklist h4 {
+    font-size: 1.1rem;
+    color: var(--color-cherry-pink);
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+
+.yearly-advice {
+    font-size: 0.95rem;
+    color: #C2185B;
+    margin-bottom: 15px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.8);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+.yearly-needs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.yearly-need-card {
+    background: white;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.yearly-need-card h5 {
+    font-size: 0.9rem;
+    color: var(--color-cherry-pink);
+    margin: 0 0 8px 0;
+}
+
+.yearly-need-card ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.yearly-need-card li {
+    margin-bottom: 4px;
+}
+
+.yearly-crazy-tips {
+    background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+}
+
+.yearly-crazy-tips h5 {
+    font-size: 0.9rem;
+    color: #F57F17;
+    margin: 0 0 8px 0;
+}
+
+.yearly-crazy-tips ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85rem;
+    color: #E65100;
+}
+
+/* ===== TOP 3 核心建议 ===== */
+.top3-advice {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    border: 2px solid #1976D2;
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin: 15px 0;
+}
+
+.top3-advice h4 {
+    font-size: 1.1rem;
+    color: #1565C0;
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+
+.top3-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top3-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+}
+
+.top3-list li:last-child {
+    margin-bottom: 0;
+}
+
+.top3-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1976D2;
+    flex-shrink: 0;
+}
+
+.top3-content {
+    flex: 1;
+    color: #333;
+}
+
+/* 移动端适配 - 新卡片 */
+@media (max-width: 480px) {
+    .wuxing-tips-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .yearly-needs {
+        grid-template-columns: 1fr;
+    }
+
+    .kitty-data-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

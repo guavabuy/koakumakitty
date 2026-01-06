@@ -16,6 +16,7 @@ import ChineseCalendar, {
     STEM_YIN_YANG,
     ZODIAC_ANIMALS
 } from './core/calendar.js';
+import { generate2026YearlyTips, kittySpeak } from './core/wuxing_tips.js';
 
 const Yearly2026 = {
 
@@ -151,6 +152,10 @@ const Yearly2026 = {
         const fortuneOptions = { ...options, birthYear: mingLiYear };
         const fortune = this.calculateFortuneScores(userYearElement, taiSuiRelation, flowYearTenGod, fortuneOptions);
 
+        // 生成年度五行建议
+        const lang = options.lang || 'zh';
+        const yearlyWuxingTips = generate2026YearlyTips(userYearElement, lang);
+
         return {
             birthYear: mingLiYear,  // 返回命理年
             publicYear: birth.getFullYear(),  // 保留公历年供参考
@@ -161,6 +166,7 @@ const Yearly2026 = {
             dayMaster,
             flowYearTenGod,
             fortune,
+            yearlyWuxingTips,  // 新增：年度五行建议
             options
         };
     },
@@ -609,10 +615,94 @@ const Yearly2026 = {
     },
 
     /**
+     * 生成 TOP3 核心建议
+     */
+    generateTop3Advice(result, options = {}) {
+        const { fortune, userYearElement, taiSuiRelation } = result;
+        const lang = options.lang || 'zh';
+
+        const top3 = [];
+
+        // 根据运势情况生成 TOP3
+        if (lang === 'zh') {
+            // 第一条：穿搭建议
+            if (userYearElement === '金' || userYearElement === '木') {
+                top3.push('全年穿搭：黑色/深蓝色为主色调，红色少碰');
+            } else if (userYearElement === '火') {
+                top3.push('全年穿搭：保持红色系，但要搭配水元素（蓝/黑）平衡');
+            } else {
+                top3.push('全年穿搭：根据当月五行调整，春夏偏凉色，秋冬偏暖色');
+            }
+
+            // 第二条：饮品/饮食
+            if (fortune.health < 70) {
+                top3.push('饮品选择：冰饮>热饮，每天多喝500ml水，降火保健康');
+            } else {
+                top3.push('饮食策略：五行均衡，多吃当季蔬果，火年少吃辛辣');
+            }
+
+            // 第三条：方位策略
+            if (taiSuiRelation.level === 'danger') {
+                top3.push('方位策略：避开南方（午位），重要活动选北边/东边');
+            } else if (taiSuiRelation.level === 'good') {
+                top3.push('方位策略：南方是你的贵人方，多去南边活动');
+            } else {
+                top3.push('方位策略：重要活动选北边，办公室座位朝北更稳');
+            }
+        } else if (lang === 'en') {
+            if (userYearElement === '金' || userYearElement === '木') {
+                top3.push('Yearly wardrobe: Black/navy as main colors, avoid red');
+            } else if (userYearElement === '火') {
+                top3.push('Yearly wardrobe: Keep red, but balance with water elements (blue/black)');
+            } else {
+                top3.push('Yearly wardrobe: Adjust by monthly elements - cool tones in spring/summer');
+            }
+
+            if (fortune.health < 70) {
+                top3.push('Drinks: Cold > hot, add 500ml water daily to cool the Fire');
+            } else {
+                top3.push('Diet: Balance elements, eat seasonal foods, less spicy in Fire year');
+            }
+
+            if (taiSuiRelation.level === 'danger') {
+                top3.push('Direction: Avoid south (Wu position), choose north/east for important events');
+            } else if (taiSuiRelation.level === 'good') {
+                top3.push('Direction: South is your lucky direction, visit often');
+            } else {
+                top3.push('Direction: North is stable for important activities');
+            }
+        } else {
+            if (userYearElement === '金' || userYearElement === '木') {
+                top3.push('年間ファッション：黒/紺をメインに、赤は控えめに');
+            } else if (userYearElement === '火') {
+                top3.push('年間ファッション：赤をキープ、水要素（青/黒）でバランス');
+            } else {
+                top3.push('年間ファッション：月の五行に合わせて調整、春夏はクール系');
+            }
+
+            if (fortune.health < 70) {
+                top3.push('飲み物：冷たい>温かい、毎日水500ml追加で火を冷ます');
+            } else {
+                top3.push('食事：五行バランス、旬の食材、火年は辛いもの控えめ');
+            }
+
+            if (taiSuiRelation.level === 'danger') {
+                top3.push('方位：南（午）を避けて、大事なことは北/東で');
+            } else if (taiSuiRelation.level === 'good') {
+                top3.push('方位：南があなたのラッキー方位、たくさん行って');
+            } else {
+                top3.push('方位：大事なことは北向きが安定');
+            }
+        }
+
+        return top3;
+    },
+
+    /**
      * 渲染结果
      */
     renderResult(result, options = {}) {
-        const { userZodiac, taiSuiRelation, flowYearTenGod, fortune, dayMaster } = result;
+        const { userZodiac, taiSuiRelation, flowYearTenGod, fortune, dayMaster, yearlyWuxingTips, userYearElement } = result;
         const advices = this.generateAdvice(result, options);
         const luckyTips = this.generateLuckyTips(result);
         
@@ -723,6 +813,50 @@ const Yearly2026 = {
                     <div class="fortune-stars">${this.scoreToStars(fortune.health)}</div>
                 </div>
             </div>
+
+            <!-- TOP 3 核心建议 -->
+            <div class="top3-advice">
+                <h4>🎯 ${isJa ? 'TOP 3 コアアドバイス' : isEn ? 'TOP 3 Core Advice' : 'TOP 3 核心建议'}</h4>
+                <ul class="top3-list">
+                    ${this.generateTop3Advice(result, { lang: isJa ? 'ja' : isEn ? 'en' : 'zh' }).map((advice, i) => `
+                    <li>
+                        <span class="top3-number">${i + 1}️⃣</span>
+                        <span class="top3-content">${advice}</span>
+                    </li>
+                    `).join('')}
+                </ul>
+            </div>
+
+            <!-- 年度五行补给清单 -->
+            ${yearlyWuxingTips ? `
+            <div class="yearly-wuxing-checklist">
+                <h4>📋 ${isJa ? '2026年度五行チェックリスト' : isEn ? '2026 Element Checklist' : '2026年度五行补给清单'}</h4>
+                <p class="yearly-advice">${yearlyWuxingTips.yearAdvice}</p>
+                <div class="yearly-needs">
+                    <div class="yearly-need-card">
+                        <h5>💧 ${isJa ? 'メイン補給' : isEn ? 'Primary Need' : '主要补充'}：${yearlyWuxingTips.mainNeed.element}</h5>
+                        <ul>
+                            <li>${isJa ? '服装' : isEn ? 'Clothing' : '穿搭'}：${yearlyWuxingTips.mainNeed.yearlyClothing.join('、')}</li>
+                            <li>${isJa ? '食事' : isEn ? 'Food' : '饮食'}：${yearlyWuxingTips.mainNeed.yearlyFood.join('、')}</li>
+                            <li>${isJa ? 'アイテム' : isEn ? 'Items' : '物品'}：${yearlyWuxingTips.mainNeed.yearlyItems.join('、')}</li>
+                        </ul>
+                    </div>
+                    <div class="yearly-need-card">
+                        <h5>✨ ${isJa ? 'サブ補給' : isEn ? 'Secondary Need' : '辅助补充'}：${yearlyWuxingTips.secondNeed.element}</h5>
+                        <ul>
+                            <li>${isJa ? '服装' : isEn ? 'Clothing' : '穿搭'}：${yearlyWuxingTips.secondNeed.yearlyClothing.join('、')}</li>
+                            <li>${isJa ? '食事' : isEn ? 'Food' : '饮食'}：${yearlyWuxingTips.secondNeed.yearlyFood.join('、')}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="yearly-crazy-tips">
+                    <h5>🔥 ${isJa ? '大胆アドバイス' : isEn ? 'Bold Tips' : '大胆建议'}</h5>
+                    <ul>
+                        ${yearlyWuxingTips.crazyTips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+            ` : ''}
 
             <div class="analysis-card">
                 <h4>💼 ${isJa ? '仕事アドバイス' : isEn ? 'Career Advice' : '事业建议'}</h4>

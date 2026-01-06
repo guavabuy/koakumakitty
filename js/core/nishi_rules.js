@@ -27,6 +27,15 @@ import {
     WUXING
 } from './constants.js';
 
+// 导入五行小贴士库
+import {
+    WuxingTips,
+    generateWuxingTip,
+    generateDailyTip,
+    generate2026YearlyTips,
+    kittySpeak
+} from './wuxing_tips.js';
+
 /**
  * 标准返回结果接口定义
  * @typedef {Object} NiShiResult
@@ -528,4 +537,55 @@ export class NiShiRules {
             }
         };
     }
+
+    /**
+     * 4. 五行小贴士 (Wuxing Tips) - Kitty人设风格建议
+     * 生活化、有趣、可执行的五行补充建议
+     */
+    static WuxingTipsAPI = {
+        /**
+         * 获取五行小贴士库
+         */
+        getTipsLibrary() {
+            return WuxingTips;
+        },
+
+        /**
+         * 生成单个五行小贴士
+         * @param {string} element - 需要补充的五行
+         * @param {string} lang - 语言
+         */
+        generateTip(element, lang = 'zh') {
+            return generateWuxingTip(element, lang);
+        },
+
+        /**
+         * 生成每日五行建议
+         * @param {string} todayElement - 今日主旺五行
+         * @param {string} userElement - 用户日主五行
+         * @param {string} lang - 语言
+         */
+        generateDailyAdvice(todayElement, userElement, lang = 'zh') {
+            return generateDailyTip(todayElement, userElement, lang);
+        },
+
+        /**
+         * 生成2026年度五行补给清单
+         * @param {string} userElement - 用户日主五行
+         * @param {string} lang - 语言
+         */
+        generate2026Checklist(userElement, lang = 'zh') {
+            return generate2026YearlyTips(userElement, lang);
+        },
+
+        /**
+         * Kitty人设语气生成器
+         * @param {string} type - 消息类型
+         * @param {Object} data - 数据
+         * @param {string} lang - 语言
+         */
+        kittySpeak(type, data, lang = 'zh') {
+            return kittySpeak(type, data, lang);
+        }
+    };
 }

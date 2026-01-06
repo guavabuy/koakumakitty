@@ -16,6 +16,7 @@ import ChineseCalendar, {
     ZODIAC_ANIMALS
 } from './core/calendar.js';
 import { getCurrentSolarTerm, SOLAR_TERM_NAMES } from './core/solar_terms.js';
+import { generateDailyTip, kittySpeak } from './core/wuxing_tips.js';
 
 const DailyFortune = {
     // 引用核心模块的常量（保持向后兼容）
@@ -283,38 +284,113 @@ const DailyFortune = {
     },
 
     /**
-     * 生成今日建议
+     * 生成今日建议（新人设语气版本）
      */
-    generateAdvice(fortune) {
+    generateAdvice(fortune, options = {}) {
         const advices = [];
+        const lang = options.lang || 'zh';
+        const percent = Math.round(Math.abs(fortune.overall - 60) * 0.5 + 10);
 
-        if (fortune.overall >= 80) {
-            advices.push('今日运势大吉，宜积极进取，把握良机。');
-        } else if (fortune.overall >= 60) {
-            advices.push('今日运势平稳，按部就班即可。');
-        } else {
-            advices.push('今日运势欠佳，宜守不宜攻，低调行事。');
-        }
+        if (lang === 'zh') {
+            if (fortune.overall >= 80) {
+                advices.push(`今天数据满格，成功率比平时高${percent}%，冲！`);
+            } else if (fortune.overall >= 60) {
+                advices.push(`今天数据还行，按部就班就能稳稳的~`);
+            } else {
+                advices.push(`今天指标偏低，建议静养，刷剧>社交~`);
+            }
 
-        if (fortune.career >= 75) {
-            advices.push('事业运旺，适合谈判、签约、面试。');
-        }
+            if (fortune.career >= 75) {
+                advices.push(`事业数据亮眼，谈判/签约/面试成功率+${Math.round(fortune.career * 0.3)}%`);
+            }
 
-        if (fortune.wealth >= 75) {
-            advices.push('财运亨通，有意外收获可能。');
-        } else if (fortune.wealth < 50) {
-            advices.push('财运平淡，避免大额投资。');
-        }
+            if (fortune.wealth >= 75) {
+                advices.push(`财运雷达显示有惊喜，留意意外收获~`);
+            } else if (fortune.wealth < 50) {
+                advices.push(`财运曲线平缓，大额投资今天pass~`);
+            }
 
-        if (fortune.love >= 75) {
-            advices.push('感情运佳，利于表白、约会。');
-        }
+            if (fortune.love >= 75) {
+                advices.push(`桃花指数爆表，表白/约会成功率+${Math.round(fortune.love * 0.25)}%`);
+            }
 
-        if (fortune.health < 60) {
-            advices.push('注意休息，避免过度劳累。');
+            if (fortune.health < 60) {
+                advices.push(`健康值偏低，多休息才能满血复活~`);
+            }
+        } else if (lang === 'en') {
+            if (fortune.overall >= 80) {
+                advices.push(`Data maxed today, success rate ${percent}% higher - go for it!`);
+            } else if (fortune.overall >= 60) {
+                advices.push(`Data looks decent, steady pace will do~`);
+            } else {
+                advices.push(`Metrics low today, rest mode - Netflix > socializing~`);
+            }
+
+            if (fortune.career >= 75) {
+                advices.push(`Career data shines, negotiations/interviews +${Math.round(fortune.career * 0.3)}% success`);
+            }
+
+            if (fortune.wealth >= 75) {
+                advices.push(`Wealth radar detects surprises, watch for bonuses~`);
+            } else if (fortune.wealth < 50) {
+                advices.push(`Wealth curve flat, skip big investments today~`);
+            }
+
+            if (fortune.love >= 75) {
+                advices.push(`Romance index maxed, confessions/dates +${Math.round(fortune.love * 0.25)}% success`);
+            }
+
+            if (fortune.health < 60) {
+                advices.push(`Health bar low, rest up to respawn at full HP~`);
+            }
+        } else if (lang === 'ja') {
+            if (fortune.overall >= 80) {
+                advices.push(`今日はデータ満タン、成功率が${percent}%アップ、行こう！`);
+            } else if (fortune.overall >= 60) {
+                advices.push(`今日のデータはまあまあ、コツコツやれば安定～`);
+            } else {
+                advices.push(`今日は指標低め、静養推奨、ドラマ鑑賞>社交～`);
+            }
+
+            if (fortune.career >= 75) {
+                advices.push(`仕事データ絶好調、商談/面接の成功率+${Math.round(fortune.career * 0.3)}%`);
+            }
+
+            if (fortune.wealth >= 75) {
+                advices.push(`金運レーダーがサプライズを検知、臨時収入あるかも～`);
+            } else if (fortune.wealth < 50) {
+                advices.push(`金運曲線フラット、大きな投資は今日はパス～`);
+            }
+
+            if (fortune.love >= 75) {
+                advices.push(`桃花指数がMAX、告白/デートの成功率+${Math.round(fortune.love * 0.25)}%`);
+            }
+
+            if (fortune.health < 60) {
+                advices.push(`健康値低め、休んでフルHPで復活して～`);
+            }
         }
 
         return advices;
+    },
+
+    /**
+     * 生成五行小贴士卡片
+     */
+    generateWuxingTipCard(todayElement, userElement, lang = 'zh') {
+        const tip = generateDailyTip(todayElement, userElement, lang);
+        if (!tip) return null;
+
+        return {
+            element: tip.needElement,
+            reason: tip.reason,
+            clothing: tip.clothing,
+            food: tip.food,
+            activity: tip.activity,
+            item: tip.item,
+            crazyTip: tip.crazyTip,
+            kittyComment: tip.kittyComment
+        };
     },
 
     /**
@@ -324,16 +400,26 @@ const DailyFortune = {
     calculate(birthDate, options = {}) {
         const todayGanZhi = this.getTodayGanZhi();
         const lunarDate = this.getLunarDate();
-        
+
+        // 检测语言
+        const lang = options.lang || 'zh';
+
         // 使用新的确定性计算方法
         const fortuneResult = this.calculateFortune(birthDate, todayGanZhi, options);
         const fortune = this.generateDetailedFortune(
-            fortuneResult.score, 
-            fortuneResult.userElement, 
+            fortuneResult.score,
+            fortuneResult.userElement,
             fortuneResult.todayElement
         );
         const luckyInfo = this.generateLuckyInfo(todayGanZhi);
-        const advices = this.generateAdvice(fortune);
+        const advices = this.generateAdvice(fortune, { lang });
+
+        // 生成五行小贴士
+        const wuxingTip = this.generateWuxingTipCard(
+            fortuneResult.todayElement,
+            fortuneResult.userElement,
+            lang
+        );
 
         return {
             todayGanZhi,
@@ -345,7 +431,9 @@ const DailyFortune = {
             factors: fortuneResult.factors,
             // 新增：元素信息
             userElement: fortuneResult.userElement,
-            todayElement: fortuneResult.todayElement
+            todayElement: fortuneResult.todayElement,
+            // 新增：五行小贴士
+            wuxingTip
         };
     },
 
@@ -393,15 +481,16 @@ const DailyFortune = {
     },
 
     /**
-     * 渲染结果
+     * 渲染结果（新人设版本）
      */
     renderResult(result, options = {}) {
-        const { todayGanZhi, lunarDate, fortune, luckyInfo, advices } = result;
+        const { todayGanZhi, lunarDate, fortune, luckyInfo, advices, wuxingTip, userElement, todayElement } = result;
         const today = new Date();
-        
+
         // 检测语言
         const isEn = typeof I18n !== 'undefined' && I18n.isEnglish();
         const isJa = typeof I18n !== 'undefined' && I18n.isJapanese();
+        const lang = isJa ? 'ja' : isEn ? 'en' : 'zh';
 
         // 个性化称呼
         let greeting = '';
@@ -418,30 +507,30 @@ const DailyFortune = {
         const filledFields = [options.hour !== null, options.gender, options.name].filter(Boolean).length;
         if (filledFields === 3) {
             accuracyNote = isJa
-                ? '<div class="accuracy-note">✨ 情報バッチリ！Kittyの占い超精密だよ！ニャー～</div>'
+                ? '<div class="accuracy-note high">✨ 情報バッチリ！Kittyの占い超精密だよ！ニャー～</div>'
                 : isEn
-                ? '<div class="accuracy-note">✨ Great info! Kitty can be super accurate! Meow~</div>'
-                : '<div class="accuracy-note">✨ 资料很全，Kitty算得超精准哦！喵喵喵~</div>';
+                ? '<div class="accuracy-note high">✨ Great info! Kitty can be super accurate! Meow~</div>'
+                : '<div class="accuracy-note high">✨ 资料很全，Kitty算得超精准哦！喵喵喵~</div>';
         } else if (filledFields === 2) {
             accuracyNote = isJa
-                ? '<div class="accuracy-note">🐱 まあまあね、もうちょっと情報があれば完璧なのに～</div>'
+                ? '<div class="accuracy-note medium">🐱 まあまあね、もうちょっと情報があれば完璧なのに～</div>'
                 : isEn
-                ? '<div class="accuracy-note">🐱 Not bad, a bit more info would be better~</div>'
-                : '<div class="accuracy-note">🐱 还可以哦，资料再多一点就更准了~</div>';
+                ? '<div class="accuracy-note medium">🐱 Not bad, a bit more info would be better~</div>'
+                : '<div class="accuracy-note medium">🐱 还可以哦，资料再多一点就更准了~</div>';
         } else if (filledFields === 1) {
             accuracyNote = isJa
-                ? '<div class="accuracy-note">😼 情報少ないわね、大雑把にしか占えないよ～</div>'
+                ? '<div class="accuracy-note low">😼 情報少ないわね、大雑把にしか占えないよ～</div>'
                 : isEn
-                ? '<div class="accuracy-note">😼 Info is sparse, Kitty can only give a rough reading~</div>'
-                : '<div class="accuracy-note">😼 资料有点少哦，Kitty只能算个大概~</div>';
+                ? '<div class="accuracy-note low">😼 Info is sparse, Kitty can only give a rough reading~</div>'
+                : '<div class="accuracy-note low">😼 资料有点少哦，Kitty只能算个大概~</div>';
         } else {
             accuracyNote = isJa
-                ? '<div class="accuracy-note">😿 誕生日だけ…次はもっと教えてよね～</div>'
+                ? '<div class="accuracy-note low">😿 誕生日だけ…次はもっと教えてよね～</div>'
                 : isEn
-                ? '<div class="accuracy-note">😿 Only birthday... tell Kitty more next time~</div>'
-                : '<div class="accuracy-note">😿 只知道生日...下次多告诉Kitty一些呗~</div>';
+                ? '<div class="accuracy-note low">😿 Only birthday... tell Kitty more next time~</div>'
+                : '<div class="accuracy-note low">😿 只知道生日...下次多告诉Kitty一些呗~</div>';
         }
-        
+
         // 翻译颜色和方位
         const colorTrans = this.translateColor(luckyInfo.color, isJa);
         const directionTrans = this.translateDirection(luckyInfo.direction, isJa);
@@ -455,6 +544,20 @@ const DailyFortune = {
         const monthSep = isEn ? '/' : '月';
         const dateSuffix = isEn ? '' : '日';
 
+        // 五行标签映射
+        const elementLabels = {
+            zh: { '木': '木', '火': '火', '土': '土', '金': '金', '水': '水' },
+            en: { '木': 'Wood', '火': 'Fire', '土': 'Earth', '金': 'Metal', '水': 'Water' },
+            ja: { '木': '木', '火': '火', '土': '土', '金': '金', '水': '水' }
+        };
+
+        // 生成Kitty数据分析开场白
+        const kittyIntro = isJa
+            ? `今日のデータ：${todayElement}旺${userElement}弱、総合スコア${fortune.overall}点`
+            : isEn
+            ? `Today's Data: ${elementLabels.en[todayElement]} high, ${elementLabels.en[userElement]} low, score ${fortune.overall}`
+            : `今日数据：${todayElement}旺${userElement}弱，综合评分${fortune.overall}分`;
+
         let html = `
             ${greeting}
             ${accuracyNote}
@@ -462,7 +565,15 @@ const DailyFortune = {
                 <span id="daily-lunar-result">${lunarLabel}${lunarDate.month}${monthSuffix}${lunarDate.day} ${todayGanZhi.dayStem}${todayGanZhi.dayBranch}${daySuffix}</span>
                 <span>${today.getFullYear()}${yearSep}${today.getMonth() + 1}${monthSep}${today.getDate()}${dateSuffix}</span>
             </div>
-            
+
+            <!-- Kitty数据分析卡片 -->
+            <div class="kitty-data-card">
+                <div class="kitty-avatar">😺</div>
+                <div class="kitty-speech">
+                    <p class="kitty-intro">${kittyIntro}</p>
+                </div>
+            </div>
+
             <div class="fortune-overview">
                 <div class="fortune-item">
                     <div class="fortune-icon">📊</div>
@@ -485,7 +596,37 @@ const DailyFortune = {
                     <div class="fortune-stars">${this.scoreToStars(fortune.love)}</div>
                 </div>
             </div>
-            
+
+            <!-- 五行小贴士卡片 -->
+            ${wuxingTip ? `
+            <div class="wuxing-tip-card">
+                <h4>✨ ${isJa ? '今日の五行Tips' : isEn ? "Today's Element Tips" : '今日五行小贴士'}</h4>
+                <p class="wuxing-reason">${wuxingTip.reason}</p>
+                <div class="wuxing-tips-grid">
+                    <div class="wuxing-tip-item">
+                        <span class="tip-icon">☕</span>
+                        <span class="tip-label">${isJa ? '飲食' : isEn ? 'Food' : '饮食'}</span>
+                        <span class="tip-value">${wuxingTip.food}</span>
+                    </div>
+                    <div class="wuxing-tip-item">
+                        <span class="tip-icon">👕</span>
+                        <span class="tip-label">${isJa ? 'ファッション' : isEn ? 'Wear' : '穿搭'}</span>
+                        <span class="tip-value">${wuxingTip.clothing}</span>
+                    </div>
+                    <div class="wuxing-tip-item">
+                        <span class="tip-icon">🎯</span>
+                        <span class="tip-label">${isJa ? '行動' : isEn ? 'Action' : '行动'}</span>
+                        <span class="tip-value">${wuxingTip.activity}</span>
+                    </div>
+                </div>
+                <div class="wuxing-crazy-tip">
+                    <span class="crazy-label">🔥 ${isJa ? '大胆アドバイス' : isEn ? 'Bold Tip' : '大胆建议'}：</span>
+                    <span class="crazy-value">${wuxingTip.crazyTip}</span>
+                </div>
+                <p class="kitty-comment">${wuxingTip.kittyComment}</p>
+            </div>
+            ` : ''}
+
             <div class="lucky-info">
                 <div class="lucky-item">
                     <span class="lucky-label">${isJa ? 'ラッキーカラー：' : isEn ? 'Lucky Color:' : '幸运颜色：'}</span>
@@ -504,15 +645,15 @@ const DailyFortune = {
                     <span class="lucky-value">${isJa ? zodiacTrans + '年' : isEn ? zodiacTrans + ' Year' : todayGanZhi.zodiac + '年'}</span>
                 </div>
             </div>
-            
+
             <div class="analysis-card">
-                <h4>${isJa ? '今日のアドバイス' : isEn ? 'Daily Advice' : '今日建议'}</h4>
-                <p>${isJa ? this.translateAdvicesJa(advices) : isEn ? this.translateAdvices(advices) : advices.join('<br>')}</p>
+                <h4>${isJa ? 'Kittyのアドバイス' : isEn ? "Kitty's Advice" : 'Kitty说'}</h4>
+                <p>${advices.join('<br>')}</p>
                 <p class="disclaimer-note" style="font-size: 0.85rem; color: #888; margin-top: 12px;">
                     ${isJa ? '⚠️ 毎日の運勢は参考程度にね、重大な決断には使わないでよ～' : isEn ? '⚠️ Daily fortune is for reference only, not for major decisions~' : '⚠️ 每日运势仅供参考，不作为重大决策依据～'}
                 </p>
             </div>
-            
+
             <div class="hide-seek-section">
                 <div class="hide-seek-question">
                     <span class="cat-emoji">😼</span>
