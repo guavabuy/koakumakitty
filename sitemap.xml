@@ -33,6 +33,11 @@
   
   <!-- Blog Posts -->
   <url>
+    <loc>https://koakumakitty.com/blog/posts/level-up-your-life-bedroom-feng-shui-for-modern-living.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://koakumakitty.com/blog/posts/feng-shui-bracelets-your-personalized-cheat-code-to-life.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
