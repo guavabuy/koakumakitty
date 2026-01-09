@@ -3737,3 +3737,91 @@ textarea.form-input {
         text-align: center;
     }
 }
+/* ===== SEO & Blog Components ===== */
+
+/* Breadcrumbs */
+.breadcrumb-nav {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: var(--color-text-light);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.breadcrumb-link {
+    color: var(--color-cherry-pink);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    color: var(--color-cherry-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+.breadcrumb-current {
+    color: var(--color-text-light);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+@media (max-width: 480px) {
+    .breadcrumb-current {
+        max-width: 120px;
+    }
+}
+
+/* Kitty CTA Box (Injected by SEO Automator) */
+.kitty-cta-box {
+    background: linear-gradient(135deg, #fff0f5, #e6e6fa);
+    border: 2px dashed #ff69b4;
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin: 2.5rem 0;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.15);
+}
+
+.kitty-cta-box h3 {
+    margin-top: 0;
+    color: #9370db;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.kitty-cta-box p {
+    color: #555;
+    margin-bottom: 1.2rem;
+}
+
+.kitty-cta-box .cta-button {
+    background: linear-gradient(135deg, #ff69b4, #ff8fab);
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    box-shadow: 0 4px 6px rgba(255, 105, 180, 0.2);
+}
+
+.kitty-cta-box .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 105, 180, 0.3);
+}
+
+.kitty-cta-box .cta-button:active {
+    transform: translateY(0);
+}
