@@ -33,7 +33,22 @@
   
   <!-- Blog Posts -->
   <url>
+    <loc>https://koakumakitty.com/blog/posts/i-ching-for-modern-careers-intuitive-guidance-for-success.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://koakumakitty.com/blog/posts/practical-tips-for-chinese-new-year-2026-prep-prosper.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://koakumakitty.com/blog/posts/zodiac-luck-boost-a-practical-guide-to-chinese-zodiac-signs.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://koakumakitty.com/blog/posts/bazi-four-pillars-of-destiny-for-modern-life-relationships.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

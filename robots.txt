@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /test-bazi.html
 Sitemap: https://koakumakitty.com/sitemap.xml
